@@ -7,12 +7,12 @@ import (
 
 var ErrInvalidString = errors.New("invalid string")
 
-// MyStringBuilder is a custom string Builder to extend its functionality
+// MyStringBuilder Custom string Builder to extend its functionality.
 type MyStringBuilder struct {
 	strings.Builder
 }
 
-// DeleteLast removes last byte from string
+// DeleteLast Removes last byte from string.
 func (b *MyStringBuilder) DeleteLast() {
 	s := b.String()
 	s = s[:len(s)-1]
@@ -20,11 +20,27 @@ func (b *MyStringBuilder) DeleteLast() {
 	b.WriteString(s)
 }
 
-// RepeatLast repeats last byte `count` times
+// RepeatLast Repeats last byte `count` times.
 func (b *MyStringBuilder) RepeatLast(count int) {
 	s := b.String()
 	repeatedLastChar := strings.Repeat(string(s[len(s)-1]), count)
 	b.WriteString(repeatedLastChar)
+}
+
+// AppendByte Adds new byte to target string
+// If byte is digit then last byte is repeated `digit` times
+// If byte is not digit then it will be appended to the end
+func (b *MyStringBuilder) AppendByte(x byte) {
+	if isDigit(x) {
+		digit := convertDigit(x)
+		if digit == 0 {
+			b.DeleteLast()
+		} else {
+			b.RepeatLast(digit - 1)
+		}
+	} else {
+		b.WriteByte(x)
+	}
 }
 
 func Unpack(s string) (string, error) {
@@ -38,20 +54,11 @@ func Unpack(s string) (string, error) {
 
 	result := MyStringBuilder{}
 	for i := 0; i < len(s); i++ {
-		if isDigit(s[i]) {
-			if isDigit(s[i-1]) {
-				return "", ErrInvalidString
-			} else {
-				digit := convertDigit(s[i])
-				if digit == 0 {
-					result.DeleteLast()
-				} else {
-					result.RepeatLast(digit - 1)
-				}
-			}
-		} else {
-			result.WriteByte(s[i])
+		if i > 0 && isDigit(s[i]) && isDigit(s[i-1]) {
+			return "", ErrInvalidString
 		}
+
+		result.AppendByte(s[i])
 	}
 
 	return result.String(), nil
