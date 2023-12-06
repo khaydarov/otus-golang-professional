@@ -27,22 +27,6 @@ func (b *MyStringBuilder) RepeatLast(count int) {
 	b.WriteString(repeatedLastChar)
 }
 
-// AppendByte Adds new byte to target string
-// If byte is digit then last byte is repeated `digit` times
-// If byte is not digit then it will be appended to the end.
-func (b *MyStringBuilder) AppendByte(x byte) {
-	if isDigit(x) {
-		digit := convertDigit(x)
-		if digit == 0 {
-			b.DeleteLast()
-		} else {
-			b.RepeatLast(digit - 1)
-		}
-	} else {
-		b.WriteByte(x)
-	}
-}
-
 func Unpack(s string) (string, error) {
 	if s == "" {
 		return s, nil
@@ -58,7 +42,16 @@ func Unpack(s string) (string, error) {
 			return "", ErrInvalidString
 		}
 
-		result.AppendByte(s[i])
+		if isDigit(s[i]) {
+			digit := convertDigit(s[i])
+			if digit == 0 {
+				result.DeleteLast()
+			} else {
+				result.RepeatLast(digit - 1)
+			}
+		} else {
+			result.WriteByte(s[i])
+		}
 	}
 
 	return result.String(), nil
