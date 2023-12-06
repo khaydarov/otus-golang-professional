@@ -29,7 +29,7 @@ func (b *MyStringBuilder) RepeatLast(count int) {
 
 // AppendByte Adds new byte to target string
 // If byte is digit then last byte is repeated `digit` times
-// If byte is not digit then it will be appended to the end
+// If byte is not digit then it will be appended to the end.
 func (b *MyStringBuilder) AppendByte(x byte) {
 	if isDigit(x) {
 		digit := convertDigit(x)
