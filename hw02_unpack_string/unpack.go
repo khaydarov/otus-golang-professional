@@ -2,65 +2,51 @@ package hw02unpackstring
 
 import (
 	"errors"
+	"strconv"
 	"strings"
+	"unicode"
 )
 
 var ErrInvalidString = errors.New("invalid string")
-
-// MyStringBuilder Custom string Builder to extend its functionality.
-type MyStringBuilder struct {
-	strings.Builder
-}
-
-// DeleteLast Removes last byte from string.
-func (b *MyStringBuilder) DeleteLast() {
-	s := b.String()
-	s = s[:len(s)-1]
-	b.Reset()
-	b.WriteString(s)
-}
-
-// RepeatLast Repeats last byte `count` times.
-func (b *MyStringBuilder) RepeatLast(count int) {
-	s := b.String()
-	repeatedLastChar := strings.Repeat(string(s[len(s)-1]), count)
-	b.WriteString(repeatedLastChar)
-}
 
 func Unpack(s string) (string, error) {
 	if s == "" {
 		return s, nil
 	}
 
-	if isDigit(s[0]) {
-		return "", ErrInvalidString
-	}
+	var (
+		result strings.Builder
+		prev   rune
+	)
 
-	result := MyStringBuilder{}
-	for i := 0; i < len(s); i++ {
-		if i > 0 && isDigit(s[i]) && isDigit(s[i-1]) {
+	for i, curr := range s {
+		if (i == 0 && unicode.IsDigit(curr)) || (unicode.IsDigit(prev) && unicode.IsDigit(curr)) {
 			return "", ErrInvalidString
 		}
 
-		if isDigit(s[i]) {
-			digit := convertDigit(s[i])
-			if digit == 0 {
-				result.DeleteLast()
-			} else {
-				result.RepeatLast(digit - 1)
+		if i == 0 {
+			prev = curr
+			continue
+		}
+
+		if unicode.IsDigit(curr) {
+			digit, err := strconv.Atoi(string(curr))
+			if err == nil {
+				r := strings.Repeat(string(prev), digit)
+				result.WriteString(r)
 			}
 		} else {
-			result.WriteByte(s[i])
+			if !unicode.IsDigit(prev) {
+				result.WriteRune(prev)
+			}
+
+			if len(s)-1 == i {
+				result.WriteRune(curr)
+			}
 		}
+
+		prev = curr
 	}
 
 	return result.String(), nil
-}
-
-func isDigit(b byte) bool {
-	return b >= '0' && b <= '9'
-}
-
-func convertDigit(b byte) int {
-	return int(b - '0')
 }
