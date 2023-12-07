@@ -37,10 +37,8 @@ func Unpack(s string) (string, error) {
 				r := strings.Repeat(string(prev), digit)
 				result.WriteString(r)
 			}
-		} else {
-			if !unicode.IsDigit(prev) {
-				result.WriteRune(prev)
-			}
+		} else if !unicode.IsDigit(prev) {
+			result.WriteRune(prev)
 		}
 
 		prev = curr
