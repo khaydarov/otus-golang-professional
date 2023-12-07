@@ -16,10 +16,12 @@ func Unpack(s string) (string, error) {
 
 	var (
 		result strings.Builder
+		i      int
 		prev   rune
+		curr   rune
 	)
 
-	for i, curr := range s {
+	for i, curr = range s {
 		if (i == 0 && unicode.IsDigit(curr)) || (unicode.IsDigit(prev) && unicode.IsDigit(curr)) {
 			return "", ErrInvalidString
 		}
@@ -39,13 +41,13 @@ func Unpack(s string) (string, error) {
 			if !unicode.IsDigit(prev) {
 				result.WriteRune(prev)
 			}
-
-			if len(s)-1 == i {
-				result.WriteRune(curr)
-			}
 		}
 
 		prev = curr
+	}
+
+	if !unicode.IsDigit(curr) {
+		result.WriteRune(curr)
 	}
 
 	return result.String(), nil
