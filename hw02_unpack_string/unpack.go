@@ -9,43 +9,45 @@ import (
 
 var ErrInvalidString = errors.New("invalid string")
 
+type Node struct {
+	R    rune
+	Next *Node
+}
+
 func Unpack(s string) (string, error) {
 	if s == "" {
 		return s, nil
 	}
 
-	var (
-		result strings.Builder
-		i      int
-		prev   rune
-		curr   rune
-	)
-
-	for i, curr = range s {
-		if (i == 0 && unicode.IsDigit(curr)) || (unicode.IsDigit(prev) && unicode.IsDigit(curr)) {
-			return "", ErrInvalidString
-		}
-
-		if i == 0 {
-			prev = curr
-			continue
-		}
-
-		if unicode.IsDigit(curr) {
-			digit, err := strconv.Atoi(string(curr))
-			if err == nil {
-				r := strings.Repeat(string(prev), digit)
-				result.WriteString(r)
-			}
-		} else if !unicode.IsDigit(prev) {
-			result.WriteRune(prev)
-		}
-
-		prev = curr
+	head := &Node{}
+	curr := head
+	for _, v := range s {
+		curr.Next = &Node{R: v}
+		curr = curr.Next
 	}
 
-	if !unicode.IsDigit(curr) {
-		result.WriteRune(curr)
+	curr = head.Next
+	if unicode.IsDigit(curr.R) {
+		return "", ErrInvalidString
+	}
+
+	var result strings.Builder
+	for curr != nil {
+		if !unicode.IsDigit(curr.R) {
+			if curr.Next != nil && unicode.IsDigit(curr.Next.R) {
+				count, err := strconv.Atoi(string(curr.Next.R))
+				if err == nil {
+					result.WriteString(strings.Repeat(string(curr.R), count))
+				} else {
+					result.WriteRune(curr.R)
+				}
+			} else {
+				result.WriteRune(curr.R)
+			}
+		} else if curr.Next != nil && unicode.IsDigit(curr.Next.R) {
+			return "", ErrInvalidString
+		}
+		curr = curr.Next
 	}
 
 	return result.String(), nil
