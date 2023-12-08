@@ -6,3 +6,9 @@ Course Plan
     * GOPATH, GOROOT
     * Go modules
     * Compilation, formatting and linting
+
+2. Syntax
+
+    * Basic types
+    * Arrays, Slices, Strings
+    * Structs, Interfaces
