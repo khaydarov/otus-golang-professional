@@ -11,6 +11,10 @@ type Entrance struct {
 }
 
 func Top10(s string) []string {
+	return topK(s, 10)
+}
+
+func topK(s string, k int) []string {
 	if s == "" {
 		return []string{}
 	}
@@ -45,7 +49,10 @@ func Top10(s string) []string {
 	})
 
 	var result []string
-	for i := 0; i < 10; i++ {
+	if len(entrances) < k {
+		k = len(entrances)
+	}
+	for i := 0; i < k; i++ {
 		result = append(result, entrances[i].Word)
 	}
 
