@@ -18,3 +18,8 @@ Course Plan
     * Scope, Closures
     * Defers
     * Slices, Maps, Runes
+
+4. Best practices working with errors
+
+    * Errors
+    * Panic, Defer, Recover
