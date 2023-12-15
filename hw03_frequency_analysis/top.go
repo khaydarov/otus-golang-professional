@@ -1,7 +1,6 @@
 package hw03frequencyanalysis
 
 import (
-	"sort"
 	"strings"
 )
 
@@ -38,22 +37,16 @@ func topK(s string, k int) []string {
 		}
 	}
 
-	entrances := make([]*Entrance, 0, len(m))
-	for _, entrance := range m {
-		entrances = append(entrances, entrance)
-	}
+	h := ConstructHeap(len(m))
 
-	sort.Slice(entrances, func(i int, j int) bool {
-		return entrances[i].Count > entrances[j].Count ||
-			(entrances[i].Count == entrances[j].Count && entrances[i].Word < entrances[j].Word)
-	})
+	for _, entrance := range m {
+		h.Insert(entrance)
+	}
 
 	var result []string
-	if len(entrances) < k {
-		k = len(entrances)
-	}
-	for i := 0; i < k; i++ {
-		result = append(result, entrances[i].Word)
+	for k > 0 && h.Size() > 0 {
+		result = append(result, h.Extract().Word)
+		k--
 	}
 
 	return result
