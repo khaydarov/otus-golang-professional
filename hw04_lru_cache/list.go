@@ -17,8 +17,8 @@ type ListItem struct {
 }
 
 type list struct {
-	head *ListItem
-	tail *ListItem
+	front *ListItem
+	back  *ListItem
 
 	length int
 }
@@ -28,21 +28,27 @@ func (l *list) Len() int {
 }
 
 func (l *list) Front() *ListItem {
-	return l.head
+	return l.front
 }
 
 func (l *list) Back() *ListItem {
-	return l.tail
+	return l.back
 }
 
 func (l *list) PushFront(v interface{}) *ListItem {
 	newItem := &ListItem{Value: v}
 
-	newItem.Next = l.head.Next
-	newItem.Prev = l.head
+	// list is empty -> front and back points to the new item
+	// list is not empty -> new item points to the current front and becomes front
+	if l.front == nil && l.back == nil {
+		l.front = newItem
+		l.back = newItem
+	} else {
+		newItem.Next = l.front
 
-	l.head.Next.Prev = newItem
-	l.head.Next = newItem
+		l.front.Prev = newItem
+		l.front = newItem
+	}
 
 	l.length++
 	return newItem
@@ -51,33 +57,54 @@ func (l *list) PushFront(v interface{}) *ListItem {
 func (l *list) PushBack(v interface{}) *ListItem {
 	newItem := &ListItem{Value: v}
 
-	newItem.Next = l.tail
-	newItem.Prev = l.tail.Prev
+	// list is empty -> front and back points to the new item
+	// list is not empty -> new item points to the current back and becomes back
+	if l.front == nil && l.back == nil {
+		l.front = newItem
+		l.back = newItem
+	} else {
+		newItem.Prev = l.back
 
-	l.tail.Prev.Next = newItem
-	l.tail.Prev = newItem
+		l.back.Next = newItem
+		l.back = newItem
+	}
 
 	l.length++
-	return l.tail
+	return newItem
 }
 
 func (l *list) Remove(i *ListItem) {
-	i.Prev.Next = i.Next
-	i.Next.Prev = i.Prev
+	if i == l.front {
+		l.front = l.front.Next
+		l.front.Prev = nil
+	} else if i == l.back {
+		l.back = l.back.Prev
+		l.back.Next = nil
+	} else {
+		i.Prev.Next = i.Next
+		i.Next.Prev = i.Prev
+	}
 
 	l.length--
 }
 
 func (l *list) MoveToFront(i *ListItem) {
-	i.Prev.Next = i.Next
-	i.Next.Prev = i.Prev
+	if l.back == i {
+		l.back = l.back.Prev
 
-	i.Next = l.head.Next
-	i.Prev = l.head
+		i.Prev.Next = nil
+		i.Prev = nil
+		i.Next = l.front
 
-	l.head.Next.Prev = i
-	l.head.Next = i
+		l.front.Prev = i
+		l.front = i
+	} else if i != l.front {
+		i.Prev.Next = i.Next
+		i.Next.Prev = i.Prev
 
+		l.front.Prev = i
+		l.front = i
+	}
 }
 
 func NewList() List {

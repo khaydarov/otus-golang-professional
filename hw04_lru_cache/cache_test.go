@@ -50,7 +50,26 @@ func TestCache(t *testing.T) {
 	})
 
 	t.Run("purge logic", func(t *testing.T) {
-		// Write me
+		c := NewCache(3)
+
+		c.Set("first", 1)
+		c.Set("second", 2)
+		c.Set("third", 3)
+		c.Set("fourth", 4)
+
+		val, ok := c.Get("first")
+		require.False(t, ok)
+		require.Nil(t, val)
+
+		val, ok = c.Get("second")
+		require.True(t, ok)
+		require.Equal(t, 2, val)
+
+		c.Clear()
+
+		val, ok = c.Get("second")
+		require.False(t, ok)
+		require.Nil(t, val)
 	})
 }
 
