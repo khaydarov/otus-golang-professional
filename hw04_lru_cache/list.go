@@ -1,16 +1,19 @@
 package hw04lrucache
 
+import "sync"
+
 type List interface {
 	Len() int
 	Front() *ListItem
 	Back() *ListItem
-	PushFront(v interface{}) *ListItem
-	PushBack(v interface{}) *ListItem
+	PushFront(key Key, v interface{}) *ListItem
+	PushBack(key Key, v interface{}) *ListItem
 	Remove(i *ListItem)
 	MoveToFront(i *ListItem)
 }
 
 type ListItem struct {
+	Key   Key
 	Value interface{}
 	Next  *ListItem
 	Prev  *ListItem
@@ -21,22 +24,35 @@ type list struct {
 	back  *ListItem
 
 	length int
+	mu     sync.Mutex
 }
 
 func (l *list) Len() int {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+
 	return l.length
 }
 
 func (l *list) Front() *ListItem {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+
 	return l.front
 }
 
 func (l *list) Back() *ListItem {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+
 	return l.back
 }
 
-func (l *list) PushFront(v interface{}) *ListItem {
-	newItem := &ListItem{Value: v}
+func (l *list) PushFront(key Key, v interface{}) *ListItem {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+
+	newItem := &ListItem{Key: key, Value: v}
 
 	// list is empty -> front and back points to the new item
 	// list is not empty -> new item points to the current front and becomes front
@@ -54,8 +70,11 @@ func (l *list) PushFront(v interface{}) *ListItem {
 	return newItem
 }
 
-func (l *list) PushBack(v interface{}) *ListItem {
-	newItem := &ListItem{Value: v}
+func (l *list) PushBack(key Key, v interface{}) *ListItem {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+
+	newItem := &ListItem{Key: key, Value: v}
 
 	// list is empty -> front and back points to the new item
 	// list is not empty -> new item points to the current back and becomes back
@@ -74,6 +93,16 @@ func (l *list) PushBack(v interface{}) *ListItem {
 }
 
 func (l *list) Remove(i *ListItem) {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+
+	if l.front == l.back {
+		l.front = nil
+		l.back = nil
+
+		return
+	}
+
 	switch i {
 	case l.front:
 		l.front = l.front.Next
@@ -90,6 +119,13 @@ func (l *list) Remove(i *ListItem) {
 }
 
 func (l *list) MoveToFront(i *ListItem) {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+
+	if l.front == l.back {
+		return
+	}
+
 	if l.back == i {
 		l.back = l.back.Prev
 
