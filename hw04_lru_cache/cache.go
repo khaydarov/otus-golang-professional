@@ -35,7 +35,10 @@ func (c *lruCache) Set(key Key, value interface{}) bool {
 		delete(c.items, b.Key)
 	}
 
-	i := c.queue.PushFront(key, value)
+	i := c.queue.PushFront(value)
+
+	// put key into ListItem so that we could find it in O(1) when we remove from c.items map
+	i.Key = key
 	c.items[key] = i
 
 	return false

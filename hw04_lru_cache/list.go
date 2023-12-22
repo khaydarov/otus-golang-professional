@@ -6,8 +6,8 @@ type List interface {
 	Len() int
 	Front() *ListItem
 	Back() *ListItem
-	PushFront(key Key, v interface{}) *ListItem
-	PushBack(key Key, v interface{}) *ListItem
+	PushFront(v interface{}) *ListItem
+	PushBack(v interface{}) *ListItem
 	Remove(i *ListItem)
 	MoveToFront(i *ListItem)
 }
@@ -48,11 +48,11 @@ func (l *list) Back() *ListItem {
 	return l.back
 }
 
-func (l *list) PushFront(key Key, v interface{}) *ListItem {
+func (l *list) PushFront(v interface{}) *ListItem {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 
-	newItem := &ListItem{Key: key, Value: v}
+	newItem := &ListItem{Value: v}
 
 	// list is empty -> front and back points to the new item
 	// list is not empty -> new item points to the current front and becomes front
@@ -70,11 +70,11 @@ func (l *list) PushFront(key Key, v interface{}) *ListItem {
 	return newItem
 }
 
-func (l *list) PushBack(key Key, v interface{}) *ListItem {
+func (l *list) PushBack(v interface{}) *ListItem {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 
-	newItem := &ListItem{Key: key, Value: v}
+	newItem := &ListItem{Value: v}
 
 	// list is empty -> front and back points to the new item
 	// list is not empty -> new item points to the current back and becomes back
