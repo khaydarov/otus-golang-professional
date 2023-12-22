@@ -32,13 +32,13 @@ func (c *lruCache) Set(key Key, value interface{}) bool {
 	if c.queue.Len() == c.capacity {
 		b := c.queue.Back()
 		c.queue.Remove(b)
-		delete(c.items, b.Key)
+		delete(c.items, Key(b.Key))
 	}
 
 	i := c.queue.PushFront(value)
 
 	// put key into ListItem so that we could find it in O(1) when we remove from c.items map
-	i.Key = key
+	i.Key = string(key)
 	c.items[key] = i
 
 	return false

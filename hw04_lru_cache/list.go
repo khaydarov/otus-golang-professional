@@ -13,7 +13,7 @@ type List interface {
 }
 
 type ListItem struct {
-	Key   Key
+	Key   string
 	Value interface{}
 	Next  *ListItem
 	Prev  *ListItem
