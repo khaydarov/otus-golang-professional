@@ -48,4 +48,59 @@ func TestList(t *testing.T) {
 		}
 		require.Equal(t, []int{70, 80, 60, 40, 10, 30, 50}, elems)
 	})
+
+	t.Run("custom student test", func(t *testing.T) {
+		l := NewList()
+
+		a := l.PushBack(10)
+		b := l.PushFront(9)
+		c := l.PushFront(8)
+		d := l.PushFront(7)
+		e := l.PushFront(6)
+		f := l.PushBack(5)
+
+		require.Equal(t, 6, l.Front().Value)
+
+		l.MoveToFront(f)
+		require.Equal(t, 5, l.Front().Value)
+
+		l.MoveToFront(a)
+		require.Equal(t, 10, l.Front().Value)
+
+		l.MoveToFront(b)
+		require.Equal(t, 9, l.Front().Value)
+
+		l.MoveToFront(c)
+		require.Equal(t, 8, l.Front().Value)
+
+		l.MoveToFront(d)
+		require.Equal(t, 7, l.Front().Value)
+
+		l.MoveToFront(e)
+		require.Equal(t, 6, l.Front().Value)
+
+		l.Remove(e)
+		require.Equal(t, 7, l.Front().Value)
+	})
+
+	t.Run("remove item from with one element", func(t *testing.T) {
+		l := NewList()
+		i := l.PushFront(10)
+		l.Remove(i)
+
+		// nothing must happen
+		l.MoveToFront(i)
+	})
+
+	t.Run("move one of the elements when two in list", func(t *testing.T) {
+		l := NewList()
+		a := l.PushFront(10)
+		b := l.PushBack(20)
+
+		l.MoveToFront(a)
+		require.Equal(t, 10, l.Front().Value)
+
+		l.MoveToFront(b)
+		require.Equal(t, 20, l.Front().Value)
+	})
 }
