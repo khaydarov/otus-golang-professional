@@ -1,6 +1,8 @@
 package hw04lrucache
 
-import "sync"
+import (
+	"sync"
+)
 
 type Key string
 
@@ -18,12 +20,22 @@ type lruCache struct {
 	mu sync.Mutex
 }
 
+type CacheItem struct {
+	Key   Key
+	Value interface{}
+}
+
 func (c *lruCache) Set(key Key, value interface{}) bool {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
+	cacheItem := CacheItem{
+		Key:   key,
+		Value: value,
+	}
+
 	if v, ok := c.items[key]; ok {
-		v.Value = value
+		v.Value = cacheItem
 		c.queue.MoveToFront(v)
 
 		return true
@@ -32,13 +44,12 @@ func (c *lruCache) Set(key Key, value interface{}) bool {
 	if c.queue.Len() == c.capacity {
 		b := c.queue.Back()
 		c.queue.Remove(b)
-		delete(c.items, Key(b.Key))
+		evictingCacheItem := b.Value.(CacheItem)
+
+		delete(c.items, evictingCacheItem.Key)
 	}
 
-	i := c.queue.PushFront(value)
-
-	// put key into ListItem so that we could find it in O(1) when we remove from c.items map
-	i.Key = string(key)
+	i := c.queue.PushFront(cacheItem)
 	c.items[key] = i
 
 	return false
@@ -50,7 +61,9 @@ func (c *lruCache) Get(key Key) (interface{}, bool) {
 
 	if v, ok := c.items[key]; ok {
 		c.queue.MoveToFront(v)
-		return v.Value, true
+
+		cacheItem := v.Value.(CacheItem)
+		return cacheItem.Value, true
 	}
 
 	return nil, false
