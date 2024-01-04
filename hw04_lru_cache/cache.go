@@ -6,6 +6,7 @@ import (
 
 type Key string
 
+//go:generate mockery --name=Cache
 type Cache interface {
 	Set(key Key, value interface{}) bool
 	Get(key Key) (interface{}, bool)

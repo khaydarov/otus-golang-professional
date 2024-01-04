@@ -2,6 +2,7 @@ package hw04lrucache
 
 import "sync"
 
+//go:generate mockery --name=List
 type List interface {
 	Len() int
 	Front() *ListItem

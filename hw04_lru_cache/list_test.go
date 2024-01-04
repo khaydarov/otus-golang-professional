@@ -1,6 +1,7 @@
-package hw04lrucache
+package hw04lrucache_test
 
 import (
+	hw04lrucache "github.com/khaydarovm/otus-golang-professional/hw04_lru_cache"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -8,7 +9,7 @@ import (
 
 func TestList(t *testing.T) {
 	t.Run("empty list", func(t *testing.T) {
-		l := NewList()
+		l := hw04lrucache.NewList()
 
 		require.Equal(t, 0, l.Len())
 		require.Nil(t, l.Front())
@@ -16,7 +17,7 @@ func TestList(t *testing.T) {
 	})
 
 	t.Run("complex", func(t *testing.T) {
-		l := NewList()
+		l := hw04lrucache.NewList()
 
 		l.PushFront(10) // [10]
 		l.PushBack(20)  // [10, 20]
@@ -50,7 +51,7 @@ func TestList(t *testing.T) {
 	})
 
 	t.Run("custom student test", func(t *testing.T) {
-		l := NewList()
+		l := hw04lrucache.NewList()
 
 		a := l.PushBack(10)
 		b := l.PushFront(9)
@@ -84,7 +85,7 @@ func TestList(t *testing.T) {
 	})
 
 	t.Run("remove item from with one element", func(t *testing.T) {
-		l := NewList()
+		l := hw04lrucache.NewList()
 		i := l.PushFront(10)
 		l.Remove(i)
 
@@ -93,7 +94,7 @@ func TestList(t *testing.T) {
 	})
 
 	t.Run("move one of the elements when two in list", func(t *testing.T) {
-		l := NewList()
+		l := hw04lrucache.NewList()
 		a := l.PushFront(10)
 		b := l.PushBack(20)
 
