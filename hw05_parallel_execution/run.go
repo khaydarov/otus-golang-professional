@@ -19,19 +19,12 @@ func Run(tasks []Task, n, m int) error {
 	}
 
 	tasksChannel := make(chan Task, len(tasks))
-
-	// calc worker count: if len(tasks) are less than N then we can run len(tasks) goroutines
-	workerCount := n
-	if workerCount > len(tasks) {
-		workerCount = len(tasks)
-	}
-
 	wg := &sync.WaitGroup{}
-	wg.Add(workerCount)
+	wg.Add(n)
 
 	// run goroutines
 	var countOfErrors int32
-	for workerID := 0; workerID < workerCount; workerID++ {
+	for workerID := 0; workerID < n; workerID++ {
 		go runTask(workerID, wg, tasksChannel, &countOfErrors, maxErrorCount)
 	}
 
