@@ -32,13 +32,7 @@ func Run(tasks []Task, n, m int) error {
 	// run goroutines
 	var countOfErrors int32
 	for workerID := 0; workerID < workerCount; workerID++ {
-		go runTask(
-			workerID,
-			wg,
-			tasksChannel,
-			&countOfErrors,
-			maxErrorCount,
-		)
+		go runTask(workerID, wg, tasksChannel, &countOfErrors, maxErrorCount)
 	}
 
 	// send tasks to workers
@@ -57,21 +51,13 @@ func Run(tasks []Task, n, m int) error {
 
 // runTask consumes task and runs it
 // every runner shares `countOfErrors` variable to check if errors exceeds max errors count.
-func runTask(
-	workerID int,
-	wg *sync.WaitGroup,
-	tasksChannel <-chan Task,
-	countOfErrors *int32,
-	maxErrorCount int32,
-) {
-	defer func() {
-		log.Printf("Worker %d terminating\n", workerID)
-	}()
+func runTask(workerID int, wg *sync.WaitGroup, tasksChannel <-chan Task, countOfErrors *int32, maxErrorCount int32) {
 	defer wg.Done()
 
 	log.Printf("Worker %d started\n", workerID)
 	for task := range tasksChannel {
 		if atomic.LoadInt32(countOfErrors) >= maxErrorCount {
+			log.Printf("Errors count exceeded. Worker %d terminating\n", workerID)
 			return
 		}
 
