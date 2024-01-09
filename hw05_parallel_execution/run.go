@@ -36,7 +36,7 @@ func Run(tasks []Task, n, m int) error {
 	for _, task := range tasks {
 		tasksChannel <- task
 
-		if countOfErrors >= maxErrorCount {
+		if atomic.LoadInt32(&countOfErrors) >= maxErrorCount {
 			finishWithError = true
 			break
 		}
