@@ -18,7 +18,7 @@ func Run(tasks []Task, n, m int) error {
 		return ErrErrorsLimitExceeded
 	}
 
-	tasksChannel := make(chan Task, len(tasks))
+	tasksChannel := make(chan Task, n)
 	wg := &sync.WaitGroup{}
 	wg.Add(n)
 
@@ -35,7 +35,7 @@ func Run(tasks []Task, n, m int) error {
 	close(tasksChannel)
 
 	wg.Wait()
-	if atomic.LoadInt32(&countOfErrors) >= maxErrorCount {
+	if countOfErrors >= maxErrorCount {
 		return ErrErrorsLimitExceeded
 	}
 
