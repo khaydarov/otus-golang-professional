@@ -6,14 +6,14 @@ type Storage struct {
 	data map[string]string
 }
 
-func (s *Storage) SaveURL(url, alias string) error {
+func (s *Storage) SaveURL(url, alias string) (int64, error) {
 	if _, ok := s.data[alias]; ok {
-		return storage.ErrURLExists
+		return 0, storage.ErrURLExists
 	}
 
 	s.data[alias] = url
 
-	return nil
+	return 10, nil
 }
 
 func (s *Storage) GetURL(alias string) (string, error) {
@@ -25,8 +25,8 @@ func (s *Storage) GetURL(alias string) (string, error) {
 	return url, nil
 }
 
-func New() (*Storage, error) {
+func New() *Storage {
 	return &Storage{
 		make(map[string]string),
-	}, nil
+	}
 }

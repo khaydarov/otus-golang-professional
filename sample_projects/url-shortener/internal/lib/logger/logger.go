@@ -1,6 +1,7 @@
 package logger
 
 import (
+	"github.com/khaydarovm/otus-golang-professional/sample_projects/url-shortener/internal/lib/logger/handler/slogpretty"
 	"log/slog"
 	"os"
 )
@@ -35,15 +36,13 @@ func SetupLogger(env string) *slog.Logger {
 }
 
 func setupPrettySlog() *slog.Logger {
-	//opts := slogpretty.PrettyHandlerOptions{
-	//	SlogOpts: &slog.HandlerOptions{
-	//		Level: slog.LevelDebug,
-	//	},
-	//}
-	//
-	//handler := opts.NewPrettyHandler(os.Stdout)
+	opts := slogpretty.PrettyHandlerOptions{
+		SlogOpts: &slog.HandlerOptions{
+			Level: slog.LevelDebug,
+		},
+	}
 
-	return slog.New(
-		slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo}),
-	) // slog.New(handler)
+	handler := opts.NewPrettyHandler(os.Stdout)
+
+	return slog.New(handler)
 }

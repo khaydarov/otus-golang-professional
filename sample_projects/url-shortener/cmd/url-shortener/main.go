@@ -5,9 +5,9 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/khaydarovm/otus-golang-professional/sample_projects/url-shortener/internal/config"
-	mwLogger "github.com/khaydarovm/otus-golang-professional/sample_projects/url-shortener/internal/http-server/middleware"
-	"github.com/khaydarovm/otus-golang-professional/sample_projects/url-shortener/internal/logger"
-	"github.com/khaydarovm/otus-golang-professional/sample_projects/url-shortener/internal/logger/sl"
+	"github.com/khaydarovm/otus-golang-professional/sample_projects/url-shortener/internal/http-server/handlers/url/save"
+	mwCustom "github.com/khaydarovm/otus-golang-professional/sample_projects/url-shortener/internal/http-server/middleware"
+	"github.com/khaydarovm/otus-golang-professional/sample_projects/url-shortener/internal/lib/logger"
 	"github.com/khaydarovm/otus-golang-professional/sample_projects/url-shortener/internal/storage/inmemory"
 	"log/slog"
 	"net/http"
@@ -20,23 +20,14 @@ func main() {
 	cfg := config.MustLoad()
 	log := logger.SetupLogger(cfg.Env)
 
-	storage, err := inmemory.New()
-	if err != nil {
-		log.Error("failed to init storage", sl.Err(err))
-		os.Exit(1)
-	}
-
-	_ = storage
+	storage := inmemory.New()
 
 	router := chi.NewRouter()
-	router.Use(middleware.RequestID)
-	router.Use(middleware.Logger)
-	router.Use(mwLogger.New(log))
+	router.Use(mwCustom.RequestID)
+	router.Use(mwCustom.New(log))
 	router.Use(middleware.Recoverer)
 
-	router.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("Hello!"))
-	})
+	router.Post("/", save.New(log, storage))
 
 	server := &http.Server{
 		Addr:    fmt.Sprintf("localhost:%s", cfg.Port),
