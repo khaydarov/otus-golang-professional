@@ -47,3 +47,39 @@ Course Plan
     * Channel internals
     * Buffered ana unbuffered channels
     * Select operator, Timer
+
+9. Synchronization primitives in details [Homework #5](./hw05_parallel_execution)
+
+   * Working with sync package: WaitGroup, Once, Mutex
+   * Race detector
+   * Atomics
+
+10. Additional synchronization primitives
+
+   * Sync.Pool, read-write Mutex
+   * Concurrent-safe maps
+   * Memory model in GO
+
+11. Concurrency patterns
+
+   * Data synchronization patterns
+   * Generators and pipeline
+   * Working with multiple channels: or, fanin, fanout
+
+12. Go internals. Scheduler
+
+   * Main schedule structures: P, M, G
+   * Goroutine switching mechanism
+   * Processing syscals and netcals
+
+13. Go internals. Memory and Garbage collection
+
+   * Memory model in Linux
+   * Memory features of Go
+   * Garbage collection
+
+14. Working with I/O
+
+   * Standard interfaces: Reader, Scanner, Writer, Closer
+   * Working with data intensive apps
+   * Regexp
