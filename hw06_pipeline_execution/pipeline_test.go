@@ -90,4 +90,57 @@ func TestPipeline(t *testing.T) {
 		require.Len(t, result, 0)
 		require.Less(t, int64(elapsed), int64(abortDur)+int64(fault))
 	})
+
+	t.Run("custom test", func(t *testing.T) {
+		multiplier := func(x int) Stage {
+			return func(in In) Out {
+				c := make(Bi)
+				go func() {
+					defer close(c)
+					for v := range in {
+						c <- x * v.(int)
+					}
+				}()
+				return c
+			}
+		}
+
+		filter := func(f func(x int) bool) Stage {
+			return func(in In) Out {
+				c := make(Bi)
+				go func() {
+					defer close(c)
+					for v := range in {
+						if f(v.(int)) == true {
+							c <- v
+						}
+					}
+				}()
+
+				return c
+			}
+		}
+
+		stages := []Stage{
+			multiplier(3),
+			filter(func(x int) bool {
+				return x%2 == 1
+			}),
+		}
+
+		in := make(Bi)
+		go func() {
+			for _, v := range []int{1, 2, 3, 4, 5} {
+				in <- v
+			}
+			close(in)
+		}()
+
+		var result []int
+		for r := range ExecutePipeline(in, nil, stages...) {
+			result = append(result, r.(int))
+		}
+
+		require.Equal(t, []int{3, 9, 15}, result)
+	})
 }
