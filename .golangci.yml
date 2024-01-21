@@ -18,6 +18,7 @@ issues:
         - gocyclo
         - gosec
         - depguard
+        - gocognit
 
 linters:
   disable-all: true
