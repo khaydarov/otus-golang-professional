@@ -1,4 +1,4 @@
-module github.com/khaydarovm/otus-golang-professional/hw01_hello_otus
+module github.com/khaydarov/otus-golang-professional/hw01_hello_otus
 
 go 1.19
 

@@ -1,4 +1,4 @@
-module github.com/khaydarovm/otus-golang-professional/sample_projects/protos
+module github.com/khaydarov/otus-golang-professional/sample_projects/protos
 
 go 1.21.4
 

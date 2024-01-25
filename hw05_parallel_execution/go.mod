@@ -1,4 +1,4 @@
-module github.com/khaydarovm/otus-golang-professional/hw05_parallel_execution
+module github.com/khaydarov/otus-golang-professional/hw05_parallel_execution
 
 go 1.19
 

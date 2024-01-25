@@ -1,4 +1,4 @@
-module github.com/khaydarovm/otus-golang-professional/hw04_lru_cache
+module github.com/khaydarov/otus-golang-professional/hw04_lru_cache
 
 go 1.19
 

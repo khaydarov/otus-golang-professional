@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/khaydarovm/otus-golang-professional/sample_projects/sso/internal/domain/models"
+	"github.com/khaydarov/otus-golang-professional/sample_projects/sso/internal/domain/models"
 )
 
 // NewToken creates new JWT token for given user and app.
