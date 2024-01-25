@@ -1,4 +1,4 @@
-module github.com/khaydarovm/otus-golang-professional/sample_projects/url-shortener
+module github.com/khaydarov/otus-golang-professional/sample_projects/url-shortener
 
 go 1.21.4
 

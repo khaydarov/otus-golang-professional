@@ -1,7 +1,7 @@
 package logger
 
 import (
-	"github.com/khaydarovm/otus-golang-professional/sample_projects/url-shortener/internal/lib/logger/handler/slogpretty"
+	"github.com/khaydarov/otus-golang-professional/sample_projects/url-shortener/internal/lib/logger/handler/slogpretty"
 	"log/slog"
 	"os"
 )

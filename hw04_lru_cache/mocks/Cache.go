@@ -3,7 +3,7 @@
 package mocks
 
 import (
-	hw04lrucache "github.com/khaydarovm/otus-golang-professional/hw04_lru_cache"
+	hw04lrucache "github.com/khaydarov/otus-golang-professional/hw04_lru_cache"
 	mock "github.com/stretchr/testify/mock"
 )
 

@@ -1,6 +1,6 @@
 package inmemory
 
-import "github.com/khaydarovm/otus-golang-professional/sample_projects/url-shortener/internal/storage"
+import "github.com/khaydarov/otus-golang-professional/sample_projects/url-shortener/internal/storage"
 
 type Storage struct {
 	data map[string]string
