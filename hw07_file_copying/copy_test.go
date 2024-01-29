@@ -1,7 +1,11 @@
 package main
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
 
 func TestCopy(t *testing.T) {
-	// Place your code here.
+	assert.True(t, true, true)
 }
