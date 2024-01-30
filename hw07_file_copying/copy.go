@@ -60,8 +60,8 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 	_, err = io.CopyN(toFile, barReader, copyLimit)
 	bar.Finish()
 
-	if err != nil {
-		os.ReadFile(toFile.Name())
+	if err != nil && err != io.EOF {
+		err = os.Remove(toPath)
 		return err
 	}
 
