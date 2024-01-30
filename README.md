@@ -50,36 +50,36 @@ Course Plan
 
 9. Synchronization primitives in details [Homework #5](./hw05_parallel_execution)
 
-   * Working with sync package: WaitGroup, Once, Mutex
-   * Race detector
-   * Atomics
+    * Working with sync package: WaitGroup, Once, Mutex
+    * Race detector
+    * Atomics
 
 10. Additional synchronization primitives
 
-   * Sync.Pool, read-write Mutex
-   * Concurrent-safe maps
-   * Memory model in GO
+    * Sync.Pool, read-write Mutex
+    * Concurrent-safe maps
+    * Memory model in GO
 
 11. Concurrency patterns [Homework #6](./hw06_pipeline_execution))
 
-   * Data synchronization patterns
-   * Generators and pipeline
-   * Working with multiple channels: or, fanin, fanout
+    * Data synchronization patterns
+    * Generators and pipeline
+    * Working with multiple channels: or, fanin, fanout
 
 12. Go internals. Scheduler
 
-   * Main schedule structures: P, M, G
-   * Goroutine switching mechanism
-   * Processing syscals and netcals
+    * Main schedule structures: P, M, G
+    * Goroutine switching mechanism
+    * Processing syscals and netcals
 
-13. Go internals. Memory and Garbage collection
+13. Working with I/O [Homework #7](./hw07_file_copying)
 
-   * Memory model in Linux
-   * Memory features of Go
-   * Garbage collection
+    * Standard interfaces: Reader, Scanner, Writer, Closer
+    * Working with data intensive apps
+    * Regexp
 
-14. Working with I/O
+14. Go internals. Memory and Garbage collection
 
-   * Standard interfaces: Reader, Scanner, Writer, Closer
-   * Working with data intensive apps
-   * Regexp
+    * Memory model in Linux
+    * Memory features of Go
+    * Garbage collection
