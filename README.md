@@ -60,7 +60,7 @@ Course Plan
    * Concurrent-safe maps
    * Memory model in GO
 
-11. Concurrency patterns
+11. Concurrency patterns [Homework #6](./hw06_pipeline_execution))
 
    * Data synchronization patterns
    * Generators and pipeline
