@@ -45,23 +45,25 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 		barLimit = fromFileInfo.Size()
 	}
 
-	if fromFileInfo.Size()-offset < limit {
+	if fromFileInfo.Size()-offset < limit || limit == 0 {
 		barLimit = fromFileInfo.Size() - offset
 	}
 
-	if limit != 0 {
-		bar = pb.Full.Start64(barLimit)
-		barReader := bar.NewProxyReader(fromFile)
-		io.CopyN(toFile, barReader, limit)
-		bar.Finish()
+	bar = pb.Full.Start64(barLimit)
+	barReader := bar.NewProxyReader(fromFile)
 
-		return nil
+	copyLimit := fromFileInfo.Size()
+	if limit != 0 {
+		copyLimit = limit
 	}
 
-	bar = pb.Full.Start64(fromFileInfo.Size() - offset)
-	barReader := bar.NewProxyReader(fromFile)
-	io.Copy(toFile, barReader)
+	_, err = io.CopyN(toFile, barReader, copyLimit)
 	bar.Finish()
+
+	if err != nil {
+		os.ReadFile(toFile.Name())
+		return err
+	}
 
 	return nil
 }
