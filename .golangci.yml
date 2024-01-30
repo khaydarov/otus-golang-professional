@@ -19,6 +19,9 @@ issues:
         - gosec
         - depguard
         - gocognit
+    - path: \.go
+      linters:
+        - depguard
 
 linters:
   disable-all: true
