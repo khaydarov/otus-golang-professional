@@ -17,9 +17,13 @@ type GRPCConfig struct {
 }
 
 func MustLoad() *Config {
+	return MustLoadByPath(".env")
+}
+
+func MustLoadByPath(path string) *Config {
 	var cfg Config
 
-	if err := cleanenv.ReadConfig(".env", &cfg); err != nil {
+	if err := cleanenv.ReadConfig(path, &cfg); err != nil {
 		log.Fatalf("cannot read env file: %s", err)
 	}
 
