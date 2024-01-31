@@ -1,9 +1,11 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/khaydarov/otus-golang-professional/sample_projects/url-shortener/internal/clients/sso/grpc"
 	"github.com/khaydarov/otus-golang-professional/sample_projects/url-shortener/internal/config"
 	"github.com/khaydarov/otus-golang-professional/sample_projects/url-shortener/internal/http-server/handlers/url/save"
 	mwCustom "github.com/khaydarov/otus-golang-professional/sample_projects/url-shortener/internal/http-server/middleware"
@@ -19,6 +21,14 @@ import (
 func main() {
 	cfg := config.MustLoad()
 	log := logger.SetupLogger(cfg.Env)
+
+	ssoclient, err := grpc.New(context.Background(), log, "localhost", 10, 3)
+	if err != nil {
+		log.Error("failed to create sso client: %s", err)
+		os.Exit(1)
+	}
+
+	_ = ssoclient
 
 	storage := inmemory.New()
 
