@@ -83,3 +83,39 @@ Course Plan
     * Memory model in Linux
     * Memory features of Go
     * Garbage collection
+
+15. Configuring and logging
+
+    * Working with config files
+    * Working with environment variables
+    * Logging - log/slog
+
+16. CLI
+
+    * Working with flags: flags, pflag, cobra
+    * Working with arguments: os.Args, os.Args[1:], os.Args[1]
+    * Working with subcommands
+
+17. Reflection
+
+    * Reflection internals
+    * Working with reflect pkg: reflect.Type and reflect.Value
+    * Working with unsafe pkg: unsafe.Pointer
+
+18. Code generation
+
+    * Working with go:generate
+    * Useful libraries: impl, stringer, mockgen, easyjson
+    * AST
+
+19. Generics
+
+    * Generics in Go 2.0
+    * Working with generics in Go 1.0: code generation, type casting, empty interface
+
+20. Profiling and debugging
+
+    * Profiling and Debugging Go apps
+    * Commands `go tool pprof` & `go tool trace`
+    * Flame graphs
+
