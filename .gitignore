@@ -26,3 +26,6 @@ ehthumbs.db
 Thumbs.db
 .vscode/
 *.bak
+go.sum
+go.mod
+main.go
