@@ -7,5 +7,6 @@ import (
 )
 
 func TestRunCmd(t *testing.T) {
-	require.True(t, true, true)
+	returnCode := RunCmd([]string{"echo", "hello"}, Environment{})
+	require.Equal(t, 0, returnCode)
 }
