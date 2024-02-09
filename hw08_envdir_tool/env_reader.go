@@ -2,9 +2,8 @@ package main
 
 import (
 	"bytes"
-	"fmt"
 	"io"
-	log "log/slog"
+	"log"
 	"os"
 	"strings"
 )
@@ -28,7 +27,7 @@ func ReadDir(dir string) (Environment, error) {
 	envs := make(Environment)
 	for _, entry := range entries {
 		if containsInvalidSymbol(entry.Name()) {
-			log.Info(fmt.Sprintf("Invalid file name: %s", entry.Name()))
+			log.Printf("Invalid file name: %s", entry.Name())
 
 			continue
 		}
