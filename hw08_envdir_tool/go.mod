@@ -1,4 +1,4 @@
-module github.com/khaydarov/otus-golang-profesional/hw08_envdir_tool
+module github.com/khaydarov/otus-golang-professional/hw08_envdir_tool
 
 go 1.19
 
