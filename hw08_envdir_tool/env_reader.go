@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"strings"
+	"unicode"
 )
 
 type Environment map[string]EnvValue
@@ -56,8 +57,8 @@ func readValue(filePath string) string {
 	data, _ = buf.ReadBytes('\n')
 	data = bytes.ReplaceAll(data, []byte("\x00"), []byte("\n"))
 
-	line := strings.TrimRight(string(data), "\n")
-	return strings.TrimRight(line, " ")
+	// @see solution from https://www.danielmorell.com/blog/how-to-trim-whitespace-from-a-string-in-go#trim_right
+	return strings.TrimRightFunc(string(data), unicode.IsSpace)
 }
 
 func containsInvalidSymbol(s string) bool {
