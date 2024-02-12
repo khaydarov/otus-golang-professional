@@ -27,7 +27,7 @@ func ReadDir(dir string) (Environment, error) {
 
 	envs := make(Environment)
 	for _, entry := range entries {
-		if containsInvalidSymbol(entry.Name()) {
+		if strings.ContainsRune(entry.Name(), '=') {
 			log.Printf("Invalid file name: %s", entry.Name())
 
 			continue
@@ -61,18 +61,4 @@ func readValue(filePath string) (string, error) {
 	data = bytes.ReplaceAll(data, []byte("\x00"), []byte("\n"))
 
 	return strings.TrimRight(string(data), " \t\r\n"), nil
-}
-
-func containsInvalidSymbol(s string) bool {
-	for _, v := range s {
-		if isInvalidSymbol(v) {
-			return true
-		}
-	}
-
-	return false
-}
-
-func isInvalidSymbol(b rune) bool {
-	return b == '='
 }
