@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"errors"
 	"io"
 	"log"
 	"os"
@@ -32,9 +33,9 @@ func ReadDir(dir string) (Environment, error) {
 			continue
 		}
 
-		v := readValue(dir + "/" + entry.Name())
+		v, err := readValue(dir + "/" + entry.Name())
 		needToRemove := false
-		if len(v) == 0 {
+		if err != nil {
 			needToRemove = true
 		}
 		envs[entry.Name()] = EnvValue{Value: v, NeedRemove: needToRemove}
@@ -43,20 +44,23 @@ func ReadDir(dir string) (Environment, error) {
 	return envs, nil
 }
 
-func readValue(filePath string) string {
+func readValue(filePath string) (string, error) {
 	file, err := os.Open(filePath)
 	if err != nil {
-		return ""
+		return "", err
 	}
 
 	defer file.Close()
 
 	data, _ := io.ReadAll(file)
+	if len(data) == 0 {
+		return "", errors.New("empty file")
+	}
 	buf := bytes.NewBuffer(data)
 	data, _ = buf.ReadBytes('\n')
 	data = bytes.ReplaceAll(data, []byte("\x00"), []byte("\n"))
 
-	return strings.TrimRight(string(data), " \t\r\n")
+	return strings.TrimRight(string(data), " \t\r\n"), nil
 }
 
 func containsInvalidSymbol(s string) bool {

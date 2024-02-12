@@ -9,15 +9,15 @@ import (
 func RunCmd(cmd []string, env Environment) (returnCode int) {
 	c := exec.Command(cmd[0], cmd[1:]...)
 
-	c.Env = os.Environ()
 	for k, v := range env {
 		if v.NeedRemove {
 			os.Unsetenv(k)
-			continue
+		} else {
+			os.Setenv(k, v.Value)
 		}
-		c.Env = append(c.Env, k+"="+v.Value)
 	}
 
+	c.Env = os.Environ()
 	c.Stdout = os.Stdout
 	err := c.Run()
 	if err != nil {
