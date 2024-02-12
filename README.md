@@ -90,7 +90,7 @@ Course Plan
     * Working with environment variables
     * Logging - log/slog
 
-16. CLI
+16. CLI [Homework #8](./hw08_envdir_tool)
 
     * Working with flags: flags, pflag, cobra
     * Working with arguments: os.Args, os.Args[1:], os.Args[1]
