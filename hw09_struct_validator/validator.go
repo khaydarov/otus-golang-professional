@@ -10,6 +10,14 @@ import (
 	"strings"
 )
 
+const (
+	Len    = "len"
+	Min    = "min"
+	Max    = "max"
+	In     = "in"
+	Regexp = "regexp"
+)
+
 type ValidationError struct {
 	Field string
 	Err   error
@@ -58,7 +66,17 @@ func validateField(field reflect.Value, tag string) error {
 	case reflect.String:
 		return validateString(field, tag)
 	case reflect.Slice:
-		return validateSlice(field, tag)
+		intSlice, ok := field.Interface().([]int)
+		if ok {
+			return validateIntSlice(intSlice, tag)
+		}
+
+		stringSlice, ok := field.Interface().([]string)
+		if ok {
+			return validateStringSlice(stringSlice, tag)
+		}
+
+		return errors.New("unsupported slice type")
 	default:
 		return errors.New("unsupported type")
 	}
@@ -70,17 +88,17 @@ func validateInt(field reflect.Value, tag string) error {
 	for _, rule := range ruleSet {
 		condition := strings.Split(rule, ":")
 		switch condition[0] {
-		case "min":
+		case Min:
 			minValue, _ := strconv.Atoi(condition[1])
 			if fieldValue < int64(minValue) {
 				return fmt.Errorf("value is less than %d", minValue)
 			}
-		case "max":
+		case Max:
 			maxValue, _ := strconv.Atoi(condition[1])
 			if fieldValue > int64(maxValue) {
 				return fmt.Errorf("value is greater than %d", maxValue)
 			}
-		case "in":
+		case In:
 			list := strings.Split(condition[1], ",")
 			if !slices.Contains(list, strconv.Itoa(int(fieldValue))) {
 				return fmt.Errorf("value is not in %v", list)
@@ -97,17 +115,17 @@ func validateString(field reflect.Value, tag string) error {
 	for _, rule := range ruleSet {
 		condition := strings.Split(rule, ":")
 		switch condition[0] {
-		case "len":
+		case Len:
 			length, _ := strconv.Atoi(condition[1])
 			if len(fieldValue) > length {
 				return fmt.Errorf("length is greater than %d", length)
 			}
-		case "in":
+		case In:
 			list := strings.Split(condition[1], ",")
 			if !slices.Contains(list, fieldValue) {
 				return fmt.Errorf("value is not in %v", list)
 			}
-		case "regexp":
+		case Regexp:
 			re, _ := regexp.Compile(condition[1])
 			match := re.MatchString(fieldValue)
 			if !match {
@@ -118,42 +136,26 @@ func validateString(field reflect.Value, tag string) error {
 	return nil
 }
 
-func validateSlice(field reflect.Value, tag string) error {
-	fieldValue := field.Interface()
+func validateIntSlice(intSlice []int, tag string) error {
 	ruleSet := strings.Split(tag, "|")
 	for _, rule := range ruleSet {
 		condition := strings.Split(rule, ":")
 		switch condition[0] {
-		case "len":
+		case Len:
 			length, _ := strconv.Atoi(condition[1])
-			stringSlice, ok := fieldValue.([]string)
-			if ok && len(stringSlice) > length {
+			if len(intSlice) > length {
 				return fmt.Errorf("length is greater than %d", length)
 			}
-
-			intSlice, ok := fieldValue.([]int)
-			if ok && len(intSlice) > length {
-				return fmt.Errorf("length is greater than %d", length)
-			}
-		case "min":
+		case Min:
 			minValue, _ := strconv.Atoi(condition[1])
-			intSlice, ok := fieldValue.([]int)
-
-			if !ok {
-				continue
-			}
 
 			for _, v := range intSlice {
 				if v < minValue {
 					return fmt.Errorf("slice value %d is less than %d", v, minValue)
 				}
 			}
-		case "max":
+		case Max:
 			maxValue, _ := strconv.Atoi(condition[1])
-			intSlice, ok := fieldValue.([]int)
-			if !ok {
-				continue
-			}
 
 			for _, v := range intSlice {
 				if v > maxValue {
@@ -162,5 +164,21 @@ func validateSlice(field reflect.Value, tag string) error {
 			}
 		}
 	}
+
+	return nil
+}
+
+func validateStringSlice(stringSlice []string, tag string) error {
+	ruleSet := strings.Split(tag, "|")
+	for _, rule := range ruleSet {
+		condition := strings.Split(rule, ":")
+		if condition[0] == Len {
+			length, _ := strconv.Atoi(condition[1])
+			if len(stringSlice) > length {
+				return fmt.Errorf("length is greater than %d", length)
+			}
+		}
+	}
+
 	return nil
 }
