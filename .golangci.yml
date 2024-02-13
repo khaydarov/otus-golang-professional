@@ -11,6 +11,8 @@ linters-settings:
   gosec:
     excludes:
       - G204
+  gocognit:
+    min-complexity: 35
 
 issues:
   exclude-rules:
