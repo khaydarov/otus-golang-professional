@@ -162,6 +162,13 @@ func validateIntSlice(intSlice []int, tag string) error {
 					return fmt.Errorf("slice value %d is greater than %d", v, maxValue)
 				}
 			}
+		case In:
+			list := strings.Split(condition[1], ",")
+			for _, v := range intSlice {
+				if !slices.Contains(list, strconv.Itoa(v)) {
+					return fmt.Errorf("slice value %d is not in %v", v, list)
+				}
+			}
 		}
 	}
 
@@ -172,10 +179,29 @@ func validateStringSlice(stringSlice []string, tag string) error {
 	ruleSet := strings.Split(tag, "|")
 	for _, rule := range ruleSet {
 		condition := strings.Split(rule, ":")
-		if condition[0] == Len {
+
+		switch condition[0] {
+		case Len:
 			length, _ := strconv.Atoi(condition[1])
 			if len(stringSlice) > length {
 				return fmt.Errorf("length is greater than %d", length)
+			}
+		case In:
+			list := strings.Split(condition[1], ",")
+
+			for _, v := range stringSlice {
+				if !slices.Contains(list, v) {
+					return fmt.Errorf("value is not in %v", list)
+				}
+			}
+		case Regexp:
+			re, _ := regexp.Compile(condition[1])
+
+			for _, v := range stringSlice {
+				match := re.MatchString(v)
+				if !match {
+					return fmt.Errorf("value does not match %s", condition[1])
+				}
 			}
 		}
 	}

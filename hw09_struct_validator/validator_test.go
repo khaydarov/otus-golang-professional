@@ -38,6 +38,10 @@ type (
 		Code int    `validate:"in:200,404,500"`
 		Body string `json:"omitempty"`
 	}
+
+	Request struct {
+		IDs []int `validate:"in:1,2,3"`
+	}
 )
 
 func TestValidate(t *testing.T) {
@@ -91,6 +95,17 @@ func TestValidate(t *testing.T) {
 				hw09structvalidator.ValidationError{
 					Field: "Code",
 					Err:   errors.New("value is not in [200 404 500]"),
+				},
+			},
+		},
+		{
+			in: Request{
+				IDs: []int{1, 2, 5},
+			},
+			expectedErr: hw09structvalidator.ValidationErrors{
+				hw09structvalidator.ValidationError{
+					Field: "IDs",
+					Err:   errors.New("slice value 5 is not in [1 2 3]"),
 				},
 			},
 		},
