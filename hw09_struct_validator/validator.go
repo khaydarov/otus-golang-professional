@@ -62,9 +62,11 @@ func validateField(field reflect.Value, tag string) error {
 	//nolint:exhaustive
 	switch field.Kind() {
 	case reflect.Int:
-		return validateInt(field, tag)
+		intValue := field.Int()
+		return validateInt(int(intValue), tag)
 	case reflect.String:
-		return validateString(field, tag)
+		stringValue := field.String()
+		return validateString(stringValue, tag)
 	case reflect.Slice:
 		intSlice, ok := field.Interface().([]int)
 		if ok {
@@ -82,26 +84,25 @@ func validateField(field reflect.Value, tag string) error {
 	}
 }
 
-func validateInt(field reflect.Value, tag string) error {
-	fieldValue := field.Int()
+func validateInt(fieldValue int, tag string) error {
 	ruleSet := strings.Split(tag, "|")
 	for _, rule := range ruleSet {
 		condition := strings.Split(rule, ":")
 		switch condition[0] {
 		case Min:
 			minValue, _ := strconv.Atoi(condition[1])
-			if fieldValue < int64(minValue) {
+			if fieldValue < minValue {
 				return fmt.Errorf("value is less than %d", minValue)
 			}
 		case Max:
 			maxValue, _ := strconv.Atoi(condition[1])
-			if fieldValue > int64(maxValue) {
+			if fieldValue > maxValue {
 				return fmt.Errorf("value is greater than %d", maxValue)
 			}
 		case In:
 			list := strings.Split(condition[1], ",")
-			if !slices.Contains(list, strconv.Itoa(int(fieldValue))) {
-				return fmt.Errorf("value is not in %v", list)
+			if !slices.Contains(list, strconv.Itoa(fieldValue)) {
+				return fmt.Errorf("value %d is not in %v", fieldValue, list)
 			}
 		}
 	}
@@ -109,8 +110,7 @@ func validateInt(field reflect.Value, tag string) error {
 	return nil
 }
 
-func validateString(field reflect.Value, tag string) error {
-	fieldValue := field.String()
+func validateString(fieldValue string, tag string) error {
 	ruleSet := strings.Split(tag, "|")
 	for _, rule := range ruleSet {
 		condition := strings.Split(rule, ":")
@@ -123,7 +123,7 @@ func validateString(field reflect.Value, tag string) error {
 		case In:
 			list := strings.Split(condition[1], ",")
 			if !slices.Contains(list, fieldValue) {
-				return fmt.Errorf("value is not in %v", list)
+				return fmt.Errorf("value %s is not in %v", fieldValue, list)
 			}
 		case Regexp:
 			re, _ := regexp.Compile(condition[1])
@@ -146,27 +146,10 @@ func validateIntSlice(intSlice []int, tag string) error {
 			if len(intSlice) > length {
 				return fmt.Errorf("length is greater than %d", length)
 			}
-		case Min:
-			minValue, _ := strconv.Atoi(condition[1])
-
-			for _, v := range intSlice {
-				if v < minValue {
-					return fmt.Errorf("slice value %d is less than %d", v, minValue)
-				}
-			}
-		case Max:
-			maxValue, _ := strconv.Atoi(condition[1])
-
-			for _, v := range intSlice {
-				if v > maxValue {
-					return fmt.Errorf("slice value %d is greater than %d", v, maxValue)
-				}
-			}
-		case In:
-			list := strings.Split(condition[1], ",")
-			for _, v := range intSlice {
-				if !slices.Contains(list, strconv.Itoa(v)) {
-					return fmt.Errorf("slice value %d is not in %v", v, list)
+		default:
+			for _, sliceValue := range intSlice {
+				if err := validateInt(sliceValue, tag); err != nil {
+					return err
 				}
 			}
 		}
@@ -179,28 +162,16 @@ func validateStringSlice(stringSlice []string, tag string) error {
 	ruleSet := strings.Split(tag, "|")
 	for _, rule := range ruleSet {
 		condition := strings.Split(rule, ":")
-
 		switch condition[0] {
 		case Len:
 			length, _ := strconv.Atoi(condition[1])
 			if len(stringSlice) > length {
 				return fmt.Errorf("length is greater than %d", length)
 			}
-		case In:
-			list := strings.Split(condition[1], ",")
-
-			for _, v := range stringSlice {
-				if !slices.Contains(list, v) {
-					return fmt.Errorf("value is not in %v", list)
-				}
-			}
-		case Regexp:
-			re, _ := regexp.Compile(condition[1])
-
-			for _, v := range stringSlice {
-				match := re.MatchString(v)
-				if !match {
-					return fmt.Errorf("value does not match %s", condition[1])
+		default:
+			for _, sliceValue := range stringSlice {
+				if err := validateString(sliceValue, tag); err != nil {
+					return err
 				}
 			}
 		}

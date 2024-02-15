@@ -94,7 +94,7 @@ func TestValidate(t *testing.T) {
 			expectedErr: hw09structvalidator.ValidationErrors{
 				hw09structvalidator.ValidationError{
 					Field: "Code",
-					Err:   errors.New("value is not in [200 404 500]"),
+					Err:   errors.New("value 600 is not in [200 404 500]"),
 				},
 			},
 		},
@@ -105,7 +105,7 @@ func TestValidate(t *testing.T) {
 			expectedErr: hw09structvalidator.ValidationErrors{
 				hw09structvalidator.ValidationError{
 					Field: "IDs",
-					Err:   errors.New("slice value 5 is not in [1 2 3]"),
+					Err:   errors.New("value 5 is not in [1 2 3]"),
 				},
 			},
 		},
