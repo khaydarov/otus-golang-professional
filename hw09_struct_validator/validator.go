@@ -144,7 +144,7 @@ func validateIntSlice(intSlice []int, tag string) error {
 		case Len:
 			length, _ := strconv.Atoi(condition[1])
 			if len(intSlice) > length {
-				return fmt.Errorf("length is greater than %d", length)
+				return fmt.Errorf("slice length is greater than %d", length)
 			}
 		default:
 			for _, sliceValue := range intSlice {
@@ -166,7 +166,7 @@ func validateStringSlice(stringSlice []string, tag string) error {
 		case Len:
 			length, _ := strconv.Atoi(condition[1])
 			if len(stringSlice) > length {
-				return fmt.Errorf("length is greater than %d", length)
+				return fmt.Errorf("slice length is greater than %d", length)
 			}
 		default:
 			for _, sliceValue := range stringSlice {
