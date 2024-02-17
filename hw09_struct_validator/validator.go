@@ -29,6 +29,15 @@ func (v ValidationErrors) Error() string {
 	return fmt.Sprint([]ValidationError(v))
 }
 
+func parseTag(tag string) map[string]string {
+	rules := make(map[string]string)
+	for _, rule := range strings.Split(tag, "|") {
+		condition := strings.Split(rule, ":")
+		rules[condition[0]] = condition[1]
+	}
+	return rules
+}
+
 func Validate(v interface{}) error {
 	value := reflect.ValueOf(v)
 	if value.Kind() != reflect.Struct {
@@ -59,32 +68,32 @@ func Validate(v interface{}) error {
 }
 
 func validateField(field reflect.Value, tag string) error {
+	rulesMap := parseTag(tag)
+
 	//nolint:exhaustive
 	switch field.Kind() {
 	case reflect.Int:
 		intValue := int(field.Int())
-		return validateInt(intValue, tag)
+		return validateInt(intValue, rulesMap)
 	case reflect.String:
 		stringValue := field.String()
-		return validateString(stringValue, tag)
+		return validateString(stringValue, rulesMap)
 	case reflect.Slice:
 		slice := make([]interface{}, field.Len())
 		for i := 0; i < field.Len(); i++ {
 			slice[i] = field.Index(i).Interface()
 		}
-		return validateSlice(slice, tag)
+		return validateSlice(slice, rulesMap)
 	default:
 		return errors.New("unsupported type")
 	}
 }
 
-func validateInt(fieldValue int, tag string) error {
-	ruleSet := strings.Split(tag, "|")
-	for _, rule := range ruleSet {
-		condition := strings.Split(rule, ":")
-		switch condition[0] {
+func validateInt(fieldValue int, rulesMap map[string]string) error {
+	for ruleType, ruleValue := range rulesMap {
+		switch ruleType {
 		case Min:
-			minValue, err := strconv.Atoi(condition[1])
+			minValue, err := strconv.Atoi(ruleValue)
 			if err != nil {
 				return err
 			}
@@ -92,7 +101,7 @@ func validateInt(fieldValue int, tag string) error {
 				return fmt.Errorf("value is less than %d", minValue)
 			}
 		case Max:
-			maxValue, err := strconv.Atoi(condition[1])
+			maxValue, err := strconv.Atoi(ruleValue)
 			if err != nil {
 				return err
 			}
@@ -100,7 +109,7 @@ func validateInt(fieldValue int, tag string) error {
 				return fmt.Errorf("value is greater than %d", maxValue)
 			}
 		case In:
-			list := strings.Split(condition[1], ",")
+			list := strings.Split(ruleValue, ",")
 			if !slices.Contains(list, strconv.Itoa(fieldValue)) {
 				return fmt.Errorf("value %d is not in %v", fieldValue, list)
 			}
@@ -110,13 +119,11 @@ func validateInt(fieldValue int, tag string) error {
 	return nil
 }
 
-func validateString(fieldValue string, tag string) error {
-	ruleSet := strings.Split(tag, "|")
-	for _, rule := range ruleSet {
-		condition := strings.Split(rule, ":")
-		switch condition[0] {
+func validateString(fieldValue string, rulesMap map[string]string) error {
+	for ruleType, ruleValue := range rulesMap {
+		switch ruleType {
 		case Len:
-			length, err := strconv.Atoi(condition[1])
+			length, err := strconv.Atoi(ruleValue)
 			if err != nil {
 				return err
 			}
@@ -124,31 +131,29 @@ func validateString(fieldValue string, tag string) error {
 				return fmt.Errorf("length is greater than %d", length)
 			}
 		case In:
-			list := strings.Split(condition[1], ",")
+			list := strings.Split(ruleValue, ",")
 			if !slices.Contains(list, fieldValue) {
 				return fmt.Errorf("value %s is not in %v", fieldValue, list)
 			}
 		case Regexp:
-			re, err := regexp.Compile(condition[1])
+			re, err := regexp.Compile(ruleValue)
 			if err != nil {
 				return err
 			}
 			match := re.MatchString(fieldValue)
 			if !match {
-				return fmt.Errorf("value does not match %s", condition[1])
+				return fmt.Errorf("value does not match %s", ruleValue)
 			}
 		}
 	}
 	return nil
 }
 
-func validateSlice(slice []interface{}, tag string) error {
-	ruleSet := strings.Split(tag, "|")
-	for _, rule := range ruleSet {
-		condition := strings.Split(rule, ":")
-		switch condition[0] {
+func validateSlice(slice []interface{}, rulesMap map[string]string) error {
+	for ruleType, ruleValue := range rulesMap {
+		switch ruleType {
 		case Len:
-			length, err := strconv.Atoi(condition[1])
+			length, err := strconv.Atoi(ruleValue)
 			if err != nil {
 				return err
 			}
@@ -160,11 +165,11 @@ func validateSlice(slice []interface{}, tag string) error {
 			for _, sliceValue := range slice {
 				switch v := sliceValue.(type) {
 				case string:
-					if err := validateString(v, tag); err != nil {
+					if err := validateString(v, rulesMap); err != nil {
 						return err
 					}
 				case int:
-					if err := validateInt(v, tag); err != nil {
+					if err := validateInt(v, rulesMap); err != nil {
 						return err
 					}
 				}
