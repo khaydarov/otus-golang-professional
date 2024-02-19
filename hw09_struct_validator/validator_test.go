@@ -1,9 +1,13 @@
-package hw09structvalidator
+package hw09structvalidator_test
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"testing"
+
+	hw09structvalidator "github.com/khaydarov/otus-golang-professional/hw09_struct_validator"
+	"github.com/stretchr/testify/require"
 )
 
 type UserRole string
@@ -34,6 +38,10 @@ type (
 		Code int    `validate:"in:200,404,500"`
 		Body string `json:"omitempty"`
 	}
+
+	Request struct {
+		IDs []int `validate:"in:1,2,3"`
+	}
 )
 
 func TestValidate(t *testing.T) {
@@ -42,10 +50,65 @@ func TestValidate(t *testing.T) {
 		expectedErr error
 	}{
 		{
-			// Place your code here.
+			in: User{
+				ID:     "123",
+				Name:   "Vasya",
+				Age:    25,
+				Email:  "vasya@gmail.com",
+				Role:   "admin",
+				Phones: []string{"+79111234567"},
+			},
+			expectedErr: nil,
 		},
-		// ...
-		// Place your code here.
+		{
+			in: App{
+				Version: "1.10.0",
+			},
+			expectedErr: hw09structvalidator.ValidationErrors{
+				hw09structvalidator.ValidationError{
+					Field: "Version",
+					Err:   errors.New("length is greater than 5"),
+				},
+			},
+		},
+		{
+			in: Token{
+				Header:    []byte("header"),
+				Payload:   []byte("payload"),
+				Signature: []byte("signature"),
+			},
+			expectedErr: nil,
+		},
+		{
+			in: Response{
+				Code: 200,
+				Body: "OK",
+			},
+			expectedErr: nil,
+		},
+		{
+			in: Response{
+				Code: 600,
+				Body: "OK",
+			},
+			expectedErr: hw09structvalidator.ValidationErrors{
+				hw09structvalidator.ValidationError{
+					Field: "Code",
+					Err:   errors.New("value 600 is not in [200 404 500]"),
+				},
+			},
+		},
+		{
+			in: Request{
+				IDs: []int{1, 2, 5},
+			},
+			expectedErr: hw09structvalidator.ValidationErrors{
+				hw09structvalidator.ValidationError{
+					Field: "IDs",
+					Err:   errors.New("value 5 is not in [1 2 3]"),
+				},
+			},
+		},
 	}
 
 	for i, tt := range tests {
@@ -53,7 +116,9 @@ func TestValidate(t *testing.T) {
 			tt := tt
 			t.Parallel()
 
-			// Place your code here.
+			err := hw09structvalidator.Validate(tt.in)
+			require.Equal(t, tt.expectedErr, err)
+
 			_ = tt
 		})
 	}
