@@ -102,7 +102,7 @@ Course Plan
     * Working with reflect pkg: reflect.Type and reflect.Value
     * Working with unsafe pkg: unsafe.Pointer
 
-18. Code generation
+18. Code generation [Homework #9](./hw09_struct_validator)
 
     * Working with go:generate
     * Useful libraries: impl, stringer, mockgen, easyjson
