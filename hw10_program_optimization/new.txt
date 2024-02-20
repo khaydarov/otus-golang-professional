@@ -1,0 +1,2 @@
+PASS
+ok  	github.com/khaydarov/otus-golang-professional/hw10_program_optimization	0.272s
