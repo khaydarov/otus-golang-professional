@@ -1,2 +1,3 @@
+BenchmarkGetDomainStat-8   	  601345	      1921 ns/op
 PASS
-ok  	github.com/khaydarov/otus-golang-professional/hw10_program_optimization	0.272s
+ok  	github.com/khaydarov/otus-golang-professional/hw10_program_optimization	8.216s
