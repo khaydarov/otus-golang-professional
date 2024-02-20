@@ -1,0 +1,16 @@
+goos: darwin
+goarch: amd64
+pkg: github.com/khaydarov/otus-golang-professional/hw10_program_optimization
+cpu: Intel(R) Core(TM) i7-1068NG7 CPU @ 2.30GHz
+BenchmarkGetDomainStat-8   	  688480	      1466 ns/op
+BenchmarkGetDomainStat-8   	  747620	      1552 ns/op
+BenchmarkGetDomainStat-8   	  752474	      1478 ns/op
+BenchmarkGetDomainStat-8   	  788553	      1500 ns/op
+BenchmarkGetDomainStat-8   	  711139	      1465 ns/op
+BenchmarkGetDomainStat-8   	  773128	      1506 ns/op
+BenchmarkGetDomainStat-8   	  754533	      1470 ns/op
+BenchmarkGetDomainStat-8   	  770316	      1477 ns/op
+BenchmarkGetDomainStat-8   	  769825	      1496 ns/op
+BenchmarkGetDomainStat-8   	  771817	      1474 ns/op
+PASS
+ok  	github.com/khaydarov/otus-golang-professional/hw10_program_optimization	11.694s
