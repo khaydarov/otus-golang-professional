@@ -113,7 +113,7 @@ Course Plan
     * Generics in Go 2.0
     * Working with generics in Go 1.0: code generation, type casting, empty interface
 
-20. Profiling and debugging
+20. Profiling and debugging [Homework #10](./hw10_program_optimization)
 
     * Profiling and Debugging Go apps
     * Commands `go tool pprof` & `go tool trace`
