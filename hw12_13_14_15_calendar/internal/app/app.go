@@ -2,25 +2,31 @@ package app
 
 import (
 	"context"
+	"github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/domain"
+	"log/slog"
 )
 
-type App struct { // TODO
+type App struct {
+	log     *slog.Logger
+	storage Storage
 }
 
-type Logger interface { // TODO
+type Storage interface {
+	Create(event *domain.Event) (string, error)
 }
 
-type Storage interface { // TODO
+func New(logger *slog.Logger, storage Storage) *App {
+	return &App{
+		logger,
+		storage,
+	}
 }
 
-func New(logger Logger, storage Storage) *App {
-	return &App{}
-}
+func (a *App) CreateEvent(_ context.Context, id, title string) (string, error) {
+	id, err := a.storage.Create(&domain.Event{ID: id, Title: title})
+	if err != nil {
+		return "", err
+	}
 
-func (a *App) CreateEvent(ctx context.Context, id, title string) error {
-	// TODO
-	return nil
-	// return a.storage.CreateEvent(storage.Event{ID: id, Title: title})
+	return id, nil
 }
-
-// TODO

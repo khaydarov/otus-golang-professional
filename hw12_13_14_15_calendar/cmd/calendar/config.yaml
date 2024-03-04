@@ -1,0 +1,4 @@
+env: local
+httpServer:
+  host: localhost
+  port: 8081

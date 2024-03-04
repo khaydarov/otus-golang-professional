@@ -1,6 +1,9 @@
 package memorystorage
 
-import "sync"
+import (
+	"github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/domain"
+	"sync"
+)
 
 type Storage struct {
 	// TODO
@@ -11,4 +14,22 @@ func New() *Storage {
 	return &Storage{}
 }
 
-// TODO
+func (s *Storage) Create(event *domain.Event) (string, error) {
+	return "", nil
+}
+
+func (s *Storage) Update(event *domain.Event) error {
+	return nil
+}
+
+func (s *Storage) Delete(id string) error {
+	return nil
+}
+
+func (s *Storage) GetAll() ([]*domain.Event, error) {
+	return nil, nil
+}
+
+func (s *Storage) GetByID(id string) (*domain.Event, error) {
+	return nil, nil
+}
