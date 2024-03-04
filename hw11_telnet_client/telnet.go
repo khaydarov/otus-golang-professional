@@ -41,9 +41,6 @@ func (c *GoTelnetClient) Connect() error {
 		return err
 	}
 
-	clientMessagesChannel := ioReaderChannel(c.in)
-
-	defer c.conn.Close()
 	return nil
 }
 
@@ -56,37 +53,20 @@ func (c *GoTelnetClient) Close() error {
 }
 
 func (c *GoTelnetClient) Send() error {
-	var err error
-	for message := range clientMessagesChannel {
-		_, err = c.conn.Write([]byte(fmt.Sprintf("%s\n", message)))
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
+	return processIO(c.in, c.conn)
 }
 
 func (c *GoTelnetClient) Receive() error {
-	var err error
-	buf := bufio.NewScanner(c.conn)
+	return processIO(c.conn, c.out)
+}
+
+func processIO(src io.Reader, dst io.Writer) error {
+	buf := bufio.NewScanner(src)
 	for buf.Scan() {
-		_, err = c.out.Write([]byte(fmt.Sprintf("%s\n", buf.Text())))
+		_, err := dst.Write([]byte(fmt.Sprintf("%s\n", buf.Text())))
 		if err != nil {
 			return err
 		}
 	}
 	return nil
-}
-
-func ioReaderChannel(in io.ReadCloser) <-chan string {
-	out := make(chan string)
-	go func() {
-		defer close(out)
-		buf := bufio.NewScanner(in)
-		for buf.Scan() {
-			out <- buf.Text()
-		}
-	}()
-	return out
 }
