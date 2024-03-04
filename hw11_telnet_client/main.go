@@ -30,6 +30,7 @@ func main() {
 
 	address := net.JoinHostPort(args[0], args[1])
 	client := MustConnect(address, duration, io.NopCloser(bufio.NewReader(os.Stdin)), os.Stdout)
+	defer client.Close()
 
 	os.Stderr.WriteString(fmt.Sprintf("...Connected to %s\n", address))
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGTERM, syscall.SIGINT)
