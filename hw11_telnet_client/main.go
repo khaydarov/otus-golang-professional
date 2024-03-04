@@ -28,20 +28,14 @@ func main() {
 		return
 	}
 
-	host := args[0]
-	port := args[1]
-	in := io.NopCloser(bufio.NewReader(os.Stdin))
-	out := os.Stdout
+	address := net.JoinHostPort(args[0], args[1])
+	client := MustConnect(address, duration, io.NopCloser(bufio.NewReader(os.Stdin)), os.Stdout)
 
-	client := MustConnect(host, port, duration, in, out)
-
-	os.Stderr.WriteString(fmt.Sprintf("...Connected to %s:%s\n", host, port))
-
-	ctx, cancel := context.WithCancel(context.Background())
+	os.Stderr.WriteString(fmt.Sprintf("...Connected to %s\n", address))
+	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGTERM, syscall.SIGINT)
 	go func() {
 		err := client.Send()
 		if err != nil {
-			log.Println("connection closed by peer")
 			cancel()
 		}
 	}()
@@ -49,23 +43,16 @@ func main() {
 	go func() {
 		err := client.Receive()
 		if err != nil {
-			log.Println()
 			cancel()
 		}
 	}()
 
-	stop := make(chan os.Signal, 1)
-	signal.Notify(stop, syscall.SIGTERM, syscall.SIGINT)
-
-	select {
-	case <-stop:
-		cancel()
-	case <-ctx.Done():
-	}
+	<-ctx.Done()
+	os.Stderr.WriteString("...Connection was closed by peer\n")
 }
 
-func MustConnect(host, port string, duration time.Duration, in io.ReadCloser, out io.Writer) TelnetClient {
-	client := NewTelnetClient(net.JoinHostPort(host, port), duration, in, out)
+func MustConnect(address string, duration time.Duration, in io.ReadCloser, out io.Writer) TelnetClient {
+	client := NewTelnetClient(address, duration, in, out)
 	err := client.Connect()
 	if err != nil {
 		log.Fatal(err)
