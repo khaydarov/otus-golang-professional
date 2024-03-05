@@ -8,6 +8,8 @@ import (
 	"time"
 )
 
+var ErrNotConnected = fmt.Errorf("not connected")
+
 type TelnetClient interface {
 	Connect() error
 	io.Closer
@@ -45,6 +47,10 @@ func (c *GoTelnetClient) Connect() error {
 }
 
 func (c *GoTelnetClient) Close() error {
+	if c.conn == nil {
+		return ErrNotConnected
+	}
+
 	err := c.conn.Close()
 	if err != nil {
 		return err
@@ -53,10 +59,16 @@ func (c *GoTelnetClient) Close() error {
 }
 
 func (c *GoTelnetClient) Send() error {
+	if c.conn == nil {
+		return ErrNotConnected
+	}
 	return processIO(c.in, c.conn)
 }
 
 func (c *GoTelnetClient) Receive() error {
+	if c.conn == nil {
+		return ErrNotConnected
+	}
 	return processIO(c.conn, c.out)
 }
 
