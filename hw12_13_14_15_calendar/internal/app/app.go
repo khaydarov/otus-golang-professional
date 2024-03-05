@@ -13,7 +13,7 @@ type App struct {
 }
 
 type Storage interface {
-	Create(event *domain.Event) (string, error)
+	Create(event *domain.Event) error
 }
 
 func New(logger *slog.Logger, storage Storage) *App {
@@ -24,10 +24,11 @@ func New(logger *slog.Logger, storage Storage) *App {
 }
 
 func (a *App) CreateEvent(_ context.Context, id, title string) (string, error) {
-	id, err := a.storage.Create(&domain.Event{ID: id, Title: title})
-	if err != nil {
-		return "", err
-	}
-
-	return id, nil
+	//id, err := a.storage.Create(&domain.Event{ID: id, Title: title})
+	//if err != nil {
+	//	return "", err
+	//}
+	//
+	//return id, nil
+	return "", nil
 }

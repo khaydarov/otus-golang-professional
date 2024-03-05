@@ -7,7 +7,7 @@ import (
 )
 
 type Config struct {
-	Env        string     `yaml:"env"`
+	LogLevel   string     `yaml:"logLevel"`
 	HTTPServer HTTPServer `yaml:"httpServer"`
 }
 

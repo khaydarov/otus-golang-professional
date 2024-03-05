@@ -25,19 +25,19 @@ func init() {
 		log.Fatalln("error loading .env file")
 	}
 
-	flag.StringVar(&configFile, "config", "../../configs/config.yaml", "Path to configuration file")
+	flag.StringVar(&configFile, "config", "configs/config.yaml", "Path to configuration file")
 }
 
 func main() {
 	flag.Parse()
 
 	cfg := config.MustLoad(configFile)
-	log := logger.New(cfg.Env)
+	logg := logger.New(cfg.LogLevel)
 
 	storage := memorystorage.New()
-	calendar := app.New(log, storage)
+	calendar := app.New(logg, storage)
 
-	server := internalhttp.NewServer(&cfg.HTTPServer, log, calendar)
+	server := internalhttp.NewServer(&cfg.HTTPServer, logg, calendar)
 
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
 	defer cancel()
@@ -49,14 +49,14 @@ func main() {
 		defer cancel()
 
 		if err := server.Stop(ctx); err != nil {
-			log.Error("failed to stop http server: " + err.Error())
+			logg.Error("failed to stop http server: " + err.Error())
 		}
 	}()
 
-	log.Info("calendar is running...")
+	logg.Info("calendar is running...")
 
 	if err := server.Start(ctx); err != nil {
-		log.Error("failed to start http server: " + err.Error())
+		logg.Error("failed to start http server: " + err.Error())
 		cancel()
 		os.Exit(1) //nolint:gocritic
 	}

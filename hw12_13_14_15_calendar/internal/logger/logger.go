@@ -6,20 +6,23 @@ import (
 )
 
 const (
-	envLocal = "local"
-	envStage = "stage"
-	envProd  = "prod"
+	Debug   = "debug"
+	Info    = "info"
+	Warning = "warning"
+	Error   = "error"
 )
 
-func New(env string) *slog.Logger {
+func New(logLevel string) *slog.Logger {
 	var level slog.Level
-	switch env {
-	case envLocal:
+	switch logLevel {
+	case Debug:
 		level = slog.LevelDebug
-	case envStage:
-		level = slog.LevelDebug
-	case envProd:
+	case Info:
 		level = slog.LevelInfo
+	case Warning:
+		level = slog.LevelWarn
+	case Error:
+		level = slog.LevelError
 	default:
 		level = slog.LevelDebug
 	}

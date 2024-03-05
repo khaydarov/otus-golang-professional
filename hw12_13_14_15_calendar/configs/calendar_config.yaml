@@ -1,4 +1,4 @@
-env: local
+logLevel: debug
 httpServer:
   host: localhost
   port: 8081
