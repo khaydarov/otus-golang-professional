@@ -3,6 +3,8 @@ package main
 import (
 	"context"
 	"flag"
+	"github.com/joho/godotenv"
+	"log"
 	"os"
 	"os/signal"
 	"syscall"
@@ -18,6 +20,11 @@ import (
 var configFile string
 
 func init() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatalln("error loading .env file")
+	}
+
 	flag.StringVar(&configFile, "config", "../../configs/config.yaml", "Path to configuration file")
 }
 
