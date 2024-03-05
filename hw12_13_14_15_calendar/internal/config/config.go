@@ -1,16 +1,17 @@
 package config
 
 import (
-	"github.com/ilyakaznacheev/cleanenv"
 	"log"
+
+	"github.com/ilyakaznacheev/cleanenv"
 )
 
 type Config struct {
 	Env        string     `yaml:"env"`
-	HttpServer HttpServer `yaml:"httpServer"`
+	HTTPServer HTTPServer `yaml:"httpServer"`
 }
 
-type HttpServer struct {
+type HTTPServer struct {
 	Host string `yaml:"host" env-default:"localhost" env:"HTTP_HOST" env-description:"HTTP server host"`
 	Port int    `yaml:"port" env-default:"8080" env:"HTTP_PORT" env-description:"HTTP server port"`
 }

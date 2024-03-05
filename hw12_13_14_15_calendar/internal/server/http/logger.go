@@ -3,24 +3,25 @@ package internalhttp
 import (
 	"context"
 	"fmt"
-	"github.com/go-chi/chi/v5/middleware"
-	"github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/logger/requestlogger"
 	"log/slog"
 	"net/http"
 	"os"
 	"time"
+
+	"github.com/go-chi/chi/v5/middleware"
+	"github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/logger/httplogger"
 )
 
 func LoggerMiddleware(filePath string) func(next http.Handler) http.Handler {
-	logFile, err := os.OpenFile(filePath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
+	logFile, err := os.OpenFile(filePath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0o644)
 	if err != nil {
 		panic(err)
 	}
 
 	log := slog.New(
-		requestlogger.NewHttpRequestLoggerHandler(
+		httplogger.NewHTTPRequestLoggerHandler(
 			logFile,
-			requestlogger.HttpRequestLoggerHandlerOptions{Level: slog.LevelInfo},
+			httplogger.HTTPRequestLoggerHandlerOptions{Level: slog.LevelInfo},
 		),
 	)
 

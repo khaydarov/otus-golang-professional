@@ -2,8 +2,9 @@ package app
 
 import (
 	"context"
-	"github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/domain"
 	"log/slog"
+
+	"github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/domain"
 )
 
 type App struct {
