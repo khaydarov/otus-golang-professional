@@ -119,3 +119,92 @@ Course Plan
     * Commands `go tool pprof` & `go tool trace`
     * Flame graphs
 
+21. Contexts and low-level network protocols [Homework #11](./hw11_telnet_client))
+
+    * Contexts package
+    * TCP, UDP, HTTP
+    * Net package: Dialer and Conn
+
+22. Working with SQL [Homework #12](./hw12_13_14_15_calendar)
+
+    * Executing SQL queries
+    * Interfaces for working with SQL: sql.DB, sql.Tx, sql.Stmt
+    * Sql injections
+
+23. Working with NoSQL
+
+    * Working with MongoDB, Redis, Clickhouse
+    * Lua scripting
+    * Debugging NoSQL
+
+24. Working with HTTP
+
+    * Creating HTTP server
+    * Decorators and middlewares
+    * Testing HTTP handlers
+
+25. Working with gRPC
+
+    * Creating gRPC server
+    * Protobuf
+    * Describing API with Protobuf
+
+26. Working with gRPC part 2 [Homework #13](./hw12_13_14_15_calendar)
+
+    * Best practices
+    * Interseptors, reliability (retries, timeouts, deadlines)
+    * TLS with gRPC
+
+27. Monoliths and microservices
+
+    * Monoliths and microservices comparison
+    * 12 factor apps
+    * Serverless architecture
+
+28. Caching
+
+    * Cache miss, cache hits, warmup
+    * LRU, LFU
+    * Data eviction
+
+29. Working with message brokers [Homework #14](./hw12_13_14_15_calendar)
+
+    * Event-driven architecture
+    * Apache Kafka, RabbitMQ
+    * Best practices
+
+30. Working with Docker [Homework #15](./hw12_13_14_15_calendar)
+
+    * Docker components: engine, cli, registry
+    * Building images and creating containers
+    * Docker-compose
+
+31. Working with Kubernetes
+
+    * Kubernetes components: master, node, pod, deployment
+    * Kubectl
+    * Manifests: replicaSets, deployments, services and ingress
+
+32. Helm [Homework #16](./hw12_13_14_15_calendar)
+
+    * Helm components: Tiller, Helm client
+    * Helm charts
+    * Helm repositories
+
+33. Monitoring
+
+    * Types of monitoring
+    * System metrics: LA, CPU, Memory, IO
+    * Prometheus and Grafana
+
+34. Tracing
+
+    * Types of tracing
+    * Jaeger, Zipkin
+    * OpenTracing
+
+35. System Design
+
+    * Problem analysis
+    * Typical mistakes
+    * Best practices
