@@ -3,11 +3,10 @@ package internalhttp
 import (
 	"context"
 	"fmt"
-	"log/slog"
-	"net/http"
-
 	"github.com/go-chi/chi/v5"
 	"github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/config"
+	"log/slog"
+	"net/http"
 )
 
 type Server struct {
@@ -18,9 +17,9 @@ type Server struct {
 
 type Application interface{}
 
-func NewServer(httpServerConfig *config.HTTPServer, logger *slog.Logger, app Application) *Server {
+func NewServer(httpServerCfg *config.HTTPServer, logger *slog.Logger, app Application) *Server {
 	return &Server{
-		httpServerConfig,
+		httpServerCfg,
 		app,
 		logger,
 	}
@@ -28,7 +27,8 @@ func NewServer(httpServerConfig *config.HTTPServer, logger *slog.Logger, app App
 
 func (s *Server) Start(ctx context.Context) error {
 	router := chi.NewRouter()
-	router.Use(LoggerMiddleware("../../log.txt"))
+
+	router.Use(LoggerMiddleware("./logs/log.txt"))
 
 	router.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("Hello, world!"))

@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"flag"
+	sqlstorage "github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/storage/sql"
 	"log"
 	"os"
 	"os/signal"
@@ -14,7 +15,6 @@ import (
 	"github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/config"
 	"github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/logger"
 	internalhttp "github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/server/http"
-	memorystorage "github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/storage/memory"
 )
 
 var configFile string
@@ -31,10 +31,20 @@ func init() {
 func main() {
 	flag.Parse()
 
+	ctx := context.Background()
+
 	cfg := config.MustLoad(configFile)
 	logg := logger.New(cfg.LogLevel)
 
-	storage := memorystorage.New()
+	// storage := memorystorage.New()
+	storage := sqlstorage.New()
+	err := storage.Connect(ctx, os.Getenv("DATABASE_URL"))
+	if err != nil {
+		panic(err)
+	}
+
+	defer storage.Close(ctx)
+
 	calendar := app.New(logg, storage)
 
 	server := internalhttp.NewServer(&cfg.HTTPServer, logg, calendar)
