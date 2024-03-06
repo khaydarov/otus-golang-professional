@@ -1,8 +1,9 @@
-package domain
+package storage
 
 import (
-	"github.com/google/uuid"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type EventID struct {
@@ -22,10 +23,14 @@ func NewEventID() EventID {
 	return EventID{id: uuidv7.String()}
 }
 
+func CreateEventIDFrom(id string) EventID {
+	return EventID{id: id}
+}
+
 type Event struct {
 	ID          EventID
 	Title       string
-	Date        time.Time
+	DateTime    time.Time
 	Duration    time.Duration
 	Description string
 	UserID      string

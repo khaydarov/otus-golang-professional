@@ -1,81 +1,109 @@
 package memorystorage
 
 import (
-	"errors"
+	"fmt"
 	"sync"
 	"time"
 
-	"github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/domain"
-)
-
-var (
-	ErrEventAlreadyExists = errors.New("event with such ID already exists")
-	ErrEventDoesNotExist  = errors.New("event with such ID does not exist")
+	"github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/storage"
 )
 
 type Storage struct {
-	mu sync.RWMutex //nolint:unused
+	mu sync.RWMutex
 
-	events map[*domain.EventID]*domain.Event
+	events map[storage.EventID]storage.Event
 }
 
 func New() *Storage {
-	return &Storage{}
+	return &Storage{
+		events: make(map[storage.EventID]storage.Event),
+	}
 }
 
-func (s *Storage) Create(event *domain.Event) error {
+func (s *Storage) Create(event storage.Event) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	if _, ok := s.events[&event.ID]; ok {
-		return ErrEventAlreadyExists
+	if _, ok := s.events[event.ID]; ok {
+		return storage.ErrEventAlreadyExists
 	}
 
-	s.events[&event.ID] = event
+	// check if date is busy
+	for _, e := range s.events {
+		if e.DateTime.Day() == event.DateTime.Day() && e.DateTime.Hour() == event.DateTime.Hour() {
+			fmt.Println(e.DateTime, event.DateTime)
+			return storage.ErrDateBusy
+		}
+	}
+
+	s.events[event.ID] = event
+	return nil
+}
+
+func (s *Storage) Update(event storage.Event) error {
+	if _, ok := s.events[event.ID]; !ok {
+		return storage.ErrEventDoesNotExist
+	}
+
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.events[event.ID] = event
 
 	return nil
 }
 
-func (s *Storage) Update(event *domain.Event) error {
-	if _, ok := s.events[&event.ID]; !ok {
-		return ErrEventDoesNotExist
-	}
-
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	s.events[&event.ID] = event
-
-	return nil
-}
-
-func (s *Storage) Delete(id *domain.EventID) error {
+func (s *Storage) Delete(id storage.EventID) error {
 	if _, ok := s.events[id]; !ok {
-		return ErrEventDoesNotExist
+		return storage.ErrEventDoesNotExist
 	}
 
 	s.mu.Lock()
-	s.mu.Unlock()
-	delete(s.events, id)
+	defer s.mu.Unlock()
 
+	delete(s.events, id)
 	return nil
 }
 
-func (s *Storage) GetAll() []*domain.Event {
-	result := make([]*domain.Event, 0, len(s.events))
+func (s *Storage) GetAll() []storage.Event {
+	result := make([]storage.Event, 0, len(s.events))
 	for _, event := range s.events {
 		result = append(result, event)
 	}
 	return result
 }
 
-func (s *Storage) GetForTheDay(day time.Time) []*domain.Event {
-	return []*domain.Event{}
+func (s *Storage) GetForTheDay(day time.Time) []storage.Event {
+	var result []storage.Event
+	for _, event := range s.events {
+		if event.DateTime.Day() == day.Day() {
+			result = append(result, event)
+		}
+	}
+
+	return result
 }
 
-func (s *Storage) GetForTheWeek(day time.Time) []*domain.Event {
-	return []*domain.Event{}
+func (s *Storage) GetForTheWeek(day time.Time) []storage.Event {
+	var result []storage.Event
+	for _, event := range s.events {
+		_, eventWeek := event.DateTime.ISOWeek()
+		_, targetDayWeek := day.ISOWeek()
+
+		if eventWeek == targetDayWeek {
+			result = append(result, event)
+		}
+	}
+
+	return result
 }
 
-func (s *Storage) GetForTheMonth(day time.Time) []*domain.Event {
-	return []*domain.Event{}
+func (s *Storage) GetForTheMonth(day time.Time) []storage.Event {
+	var result []storage.Event
+	for _, event := range s.events {
+		if event.DateTime.Month() == day.Month() {
+			result = append(result, event)
+		}
+	}
+
+	return result
 }

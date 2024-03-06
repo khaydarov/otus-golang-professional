@@ -1,16 +1,22 @@
 package storage
 
 import (
-	"github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/domain"
+	"errors"
 	"time"
 )
 
+var (
+	ErrEventAlreadyExists = errors.New("event with such ID already exists")
+	ErrEventDoesNotExist  = errors.New("event with such ID does not exist")
+	ErrDateBusy           = errors.New("date is busy")
+)
+
 type EventRepository interface {
-	Create(event *domain.Event) error
-	Update(event *domain.Event) error
-	Delete(id *domain.EventID) error
-	GetAll() []*domain.Event
-	GetForTheDay(day time.Time) []*domain.Event
-	GetForTheWeek(day time.Time) []*domain.Event
-	GetForTheMonth(day time.Time) []*domain.Event
+	Create(event Event) error
+	Update(event Event) error
+	Delete(id EventID) error
+	GetAll() []Event
+	GetForTheDay(day time.Time) []Event
+	GetForTheWeek(day time.Time) []Event
+	GetForTheMonth(day time.Time) []Event
 }

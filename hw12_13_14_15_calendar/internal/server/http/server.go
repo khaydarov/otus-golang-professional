@@ -11,9 +11,9 @@ import (
 )
 
 type Server struct {
-	Config *config.HTTPServer
-	*slog.Logger
-	Application
+	cfg *config.HTTPServer
+	app Application
+	log *slog.Logger
 }
 
 type Application interface{}
@@ -21,8 +21,8 @@ type Application interface{}
 func NewServer(httpServerConfig *config.HTTPServer, logger *slog.Logger, app Application) *Server {
 	return &Server{
 		httpServerConfig,
-		logger,
 		app,
+		logger,
 	}
 }
 
@@ -35,13 +35,14 @@ func (s *Server) Start(ctx context.Context) error {
 	})
 
 	server := &http.Server{
-		Addr:    fmt.Sprintf("%s:%d", s.Config.Host, s.Config.Port),
-		Handler: router,
+		Addr:        fmt.Sprintf("%s:%d", s.cfg.Host, s.cfg.Port),
+		ReadTimeout: 0,
+		Handler:     router,
 	}
 
 	go func() {
 		if err := server.ListenAndServe(); err != nil {
-			s.Logger.Error("failed to start server: %s", err)
+			s.log.Error("failed to start server: %s", err)
 		}
 	}()
 
@@ -49,6 +50,6 @@ func (s *Server) Start(ctx context.Context) error {
 	return nil
 }
 
-func (s *Server) Stop(ctx context.Context) error {
+func (s *Server) Stop(_ context.Context) error {
 	return nil
 }

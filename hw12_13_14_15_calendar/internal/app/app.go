@@ -4,7 +4,7 @@ import (
 	"context"
 	"log/slog"
 
-	"github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/domain"
+	"github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/storage"
 )
 
 type App struct {
@@ -13,7 +13,7 @@ type App struct {
 }
 
 type Storage interface {
-	Create(event *domain.Event) error
+	Create(event storage.Event) error
 }
 
 func New(logger *slog.Logger, storage Storage) *App {
@@ -23,12 +23,16 @@ func New(logger *slog.Logger, storage Storage) *App {
 	}
 }
 
-func (a *App) CreateEvent(_ context.Context, id, title string) (string, error) {
-	//id, err := a.storage.Create(&domain.Event{ID: id, Title: title})
-	//if err != nil {
-	//	return "", err
-	//}
-	//
-	//return id, nil
-	return "", nil
+func (a *App) CreateEvent(_ context.Context, title string) (string, error) {
+	newEvent := storage.Event{
+		ID:    storage.NewEventID(),
+		Title: title,
+	}
+
+	err := a.storage.Create(newEvent)
+	if err != nil {
+		return "", err
+	}
+
+	return newEvent.ID.Value(), nil
 }

@@ -3,13 +3,13 @@ package main
 import (
 	"context"
 	"flag"
-	"github.com/joho/godotenv"
 	"log"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
+	"github.com/joho/godotenv"
 	"github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/app"
 	"github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/config"
 	"github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/logger"
