@@ -20,7 +20,7 @@ func New() *Storage {
 	}
 }
 
-func (s *Storage) Create(event storage.Event) error {
+func (s *Storage) Insert(event storage.Event) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 

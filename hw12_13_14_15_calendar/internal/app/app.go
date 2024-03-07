@@ -8,18 +8,18 @@ import (
 )
 
 type App struct {
-	log     *slog.Logger
-	storage Storage
+	log *slog.Logger
+	r   Storage
 }
 
 type Storage interface {
-	Create(event storage.Event) error
+	Insert(event storage.Event) error
 }
 
-func New(logger *slog.Logger, storage Storage) *App {
+func New(logger *slog.Logger, s Storage) *App {
 	return &App{
 		logger,
-		storage,
+		s,
 	}
 }
 
@@ -29,7 +29,7 @@ func (a *App) CreateEvent(_ context.Context, title string) (string, error) {
 		Title: title,
 	}
 
-	err := a.storage.Create(newEvent)
+	err := a.r.Insert(newEvent)
 	if err != nil {
 		return "", err
 	}

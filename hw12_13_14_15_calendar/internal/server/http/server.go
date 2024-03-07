@@ -15,7 +15,9 @@ type Server struct {
 	log *slog.Logger
 }
 
-type Application interface{}
+type Application interface {
+	CreateEvent(ctx context.Context, title string) (string, error)
+}
 
 func NewServer(httpServerCfg *config.HTTPServer, logger *slog.Logger, app Application) *Server {
 	return &Server{
@@ -29,7 +31,6 @@ func (s *Server) Start(ctx context.Context) error {
 	router := chi.NewRouter()
 
 	router.Use(LoggerMiddleware("./logs/log.txt"))
-
 	router.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("Hello, world!"))
 	})

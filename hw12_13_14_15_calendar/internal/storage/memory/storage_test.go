@@ -12,7 +12,7 @@ import (
 func TestStorageCreate(t *testing.T) {
 	s := New()
 	event := generateEvents(1)
-	err := s.Create(event[0])
+	err := s.Insert(event[0])
 
 	require.NoError(t, err)
 	require.Len(t, s.events, 1)
@@ -21,7 +21,7 @@ func TestStorageCreate(t *testing.T) {
 func TestStorageUpdate(t *testing.T) {
 	s := New()
 	event := generateEvents(1)
-	err := s.Create(event[0])
+	err := s.Insert(event[0])
 
 	require.NoError(t, err)
 	require.Len(t, s.events, 1)
@@ -37,7 +37,7 @@ func TestStorageUpdate(t *testing.T) {
 func TestStorageDelete(t *testing.T) {
 	s := New()
 	event := generateEvents(1)
-	err := s.Create(event[0])
+	err := s.Insert(event[0])
 
 	require.NoError(t, err)
 	require.Len(t, s.events, 1)
@@ -52,7 +52,7 @@ func TestStorageGetAll(t *testing.T) {
 	s := New()
 	events := generateEvents(5)
 	for _, event := range events {
-		err := s.Create(event)
+		err := s.Insert(event)
 		require.NoError(t, err)
 	}
 
@@ -69,12 +69,12 @@ func TestStorageGetAllEmpty(t *testing.T) {
 func TestStorageCreateEventAlreadyExists(t *testing.T) {
 	s := New()
 	event := generateEvents(1)
-	err := s.Create(event[0])
+	err := s.Insert(event[0])
 
 	require.NoError(t, err)
 	require.Len(t, s.events, 1)
 
-	err = s.Create(event[0])
+	err = s.Insert(event[0])
 
 	require.Error(t, err)
 	require.Equal(t, storage.ErrEventAlreadyExists, err)
@@ -84,7 +84,7 @@ func TestStorageGetForTheDay(t *testing.T) {
 	s := New()
 	events := generateEvents(10)
 	for _, event := range events {
-		err := s.Create(event)
+		err := s.Insert(event)
 		require.NoError(t, err)
 	}
 
@@ -99,7 +99,7 @@ func TestStorageGetForTheWeek(t *testing.T) {
 	s := New()
 	events := generateEvents(10)
 	for _, event := range events {
-		s.Create(event)
+		s.Insert(event)
 	}
 
 	date, _ := time.Parse("2006-01-02", "2024-01-01")

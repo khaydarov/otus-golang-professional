@@ -12,7 +12,7 @@ var (
 )
 
 type EventRepository interface {
-	Create(event Event) error
+	Insert(event Event) error
 	Update(event Event) error
 	Delete(id EventID) error
 	GetAll() []Event

@@ -3,18 +3,18 @@ package main
 import (
 	"context"
 	"flag"
+	"github.com/joho/godotenv"
+	"github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/app"
+	"github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/config"
+	"github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/logger"
+	internalhttp "github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/server/http"
+	memorystorage "github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/storage/memory"
 	sqlstorage "github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/storage/sql"
 	"log"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
-
-	"github.com/joho/godotenv"
-	"github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/app"
-	"github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/config"
-	"github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/logger"
-	internalhttp "github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/server/http"
 )
 
 var configFile string
@@ -31,22 +31,15 @@ func init() {
 func main() {
 	flag.Parse()
 
-	ctx := context.Background()
-
 	cfg := config.MustLoad(configFile)
 	logg := logger.New(cfg.LogLevel)
 
-	// storage := memorystorage.New()
-	storage := sqlstorage.New()
-	err := storage.Connect(ctx, os.Getenv("DATABASE_URL"))
+	storage, err := initStorage(cfg.StorageType)
 	if err != nil {
-		panic(err)
+		log.Fatalln("failed to init storage: " + err.Error())
 	}
 
-	defer storage.Close(ctx)
-
 	calendar := app.New(logg, storage)
-
 	server := internalhttp.NewServer(&cfg.HTTPServer, logg, calendar)
 
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
@@ -70,4 +63,18 @@ func main() {
 		cancel()
 		os.Exit(1) //nolint:gocritic
 	}
+}
+
+func initStorage(storageType string) (app.Storage, error) {
+	if storageType == "memory" {
+		return memorystorage.New(), nil
+	}
+
+	storage := sqlstorage.New()
+	err := storage.Connect(context.Background(), os.Getenv("DATABASE_URL"))
+	if err != nil {
+		return nil, err
+	}
+
+	return storage, nil
 }

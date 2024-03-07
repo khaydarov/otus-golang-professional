@@ -35,8 +35,17 @@ func (s *Storage) Close(ctx context.Context) error {
 	return s.conn.Close(ctx)
 }
 
-func (s *Storage) Create(event storage.Event) error {
-	// implement logic to insert event into the database
-	//_, err := s.conn.Exec(context.Background(), "INSERT INTO events (id, title) VALUES ($1, $2)", event.ID, event
+func (s *Storage) Insert(event storage.Event) error {
+	_, err := s.conn.Exec(
+		context.Background(),
+		"INSERT INTO t_events (id, title) VALUES ($1, $2)",
+		event.ID.Value(),
+		event.Title,
+	)
+
+	if err != nil {
+		return err
+	}
+
 	return nil
 }

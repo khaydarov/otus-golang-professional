@@ -7,8 +7,9 @@ import (
 )
 
 type Config struct {
-	LogLevel   string     `yaml:"logLevel"`
-	HTTPServer HTTPServer `yaml:"httpServer"`
+	LogLevel    string     `yaml:"logLevel"`
+	HTTPServer  HTTPServer `yaml:"httpServer"`
+	StorageType string     `yaml:"storageType"`
 }
 
 type HTTPServer struct {
