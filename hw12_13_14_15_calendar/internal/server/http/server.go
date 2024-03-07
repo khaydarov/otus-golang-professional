@@ -3,10 +3,11 @@ package internalhttp
 import (
 	"context"
 	"fmt"
-	"github.com/go-chi/chi/v5"
-	"github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/config"
 	"log/slog"
 	"net/http"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/config"
 )
 
 type Server struct {
@@ -16,7 +17,15 @@ type Server struct {
 }
 
 type Application interface {
-	CreateEvent(ctx context.Context, title string) (string, error)
+	CreateEvent(
+		ctx context.Context,
+		title string,
+		datetime string,
+		duration string,
+		description string,
+		userID string,
+		notify string,
+	) (string, error)
 }
 
 func NewServer(httpServerCfg *config.HTTPServer, logger *slog.Logger, app Application) *Server {

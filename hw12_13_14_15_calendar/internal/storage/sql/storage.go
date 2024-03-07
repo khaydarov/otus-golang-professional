@@ -3,13 +3,12 @@ package sqlstorage
 import (
 	"context"
 	"errors"
+
 	"github.com/jackc/pgx/v5"
 	"github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/storage"
 )
 
-var (
-	ErrCouldNotConnect = errors.New("could not connect to the database")
-)
+var ErrCouldNotConnect = errors.New("could not connect to the database")
 
 type Storage struct {
 	conn *pgx.Conn
@@ -19,9 +18,8 @@ func New() *Storage {
 	return &Storage{}
 }
 
-func (s *Storage) Connect(ctx context.Context, databaseUrl string) error {
-	conn, err := pgx.Connect(ctx, databaseUrl)
-
+func (s *Storage) Connect(ctx context.Context, databaseURL string) error {
+	conn, err := pgx.Connect(ctx, databaseURL)
 	if err != nil {
 		return ErrCouldNotConnect
 	}
@@ -42,7 +40,6 @@ func (s *Storage) Insert(event storage.Event) error {
 		event.ID.Value(),
 		event.Title,
 	)
-
 	if err != nil {
 		return err
 	}

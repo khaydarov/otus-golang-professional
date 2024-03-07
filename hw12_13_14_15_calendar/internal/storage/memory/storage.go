@@ -1,7 +1,6 @@
 package memorystorage
 
 import (
-	"fmt"
 	"sync"
 	"time"
 
@@ -26,14 +25,6 @@ func (s *Storage) Insert(event storage.Event) error {
 
 	if _, ok := s.events[event.ID]; ok {
 		return storage.ErrEventAlreadyExists
-	}
-
-	// check if date is busy
-	for _, e := range s.events {
-		if e.DateTime.Day() == event.DateTime.Day() && e.DateTime.Hour() == event.DateTime.Hour() {
-			fmt.Println(e.DateTime, event.DateTime)
-			return storage.ErrDateBusy
-		}
 	}
 
 	s.events[event.ID] = event
@@ -72,10 +63,10 @@ func (s *Storage) GetAll() []storage.Event {
 	return result
 }
 
-func (s *Storage) GetForTheDay(day time.Time) []storage.Event {
+func (s *Storage) GetForTheDay(datetime time.Time) []storage.Event {
 	var result []storage.Event
 	for _, event := range s.events {
-		if event.DateTime.Day() == day.Day() {
+		if event.DateTime.Day() == datetime.Day() {
 			result = append(result, event)
 		}
 	}
@@ -83,11 +74,11 @@ func (s *Storage) GetForTheDay(day time.Time) []storage.Event {
 	return result
 }
 
-func (s *Storage) GetForTheWeek(day time.Time) []storage.Event {
+func (s *Storage) GetForTheWeek(datetime time.Time) []storage.Event {
 	var result []storage.Event
 	for _, event := range s.events {
 		_, eventWeek := event.DateTime.ISOWeek()
-		_, targetDayWeek := day.ISOWeek()
+		_, targetDayWeek := datetime.ISOWeek()
 
 		if eventWeek == targetDayWeek {
 			result = append(result, event)
@@ -97,13 +88,23 @@ func (s *Storage) GetForTheWeek(day time.Time) []storage.Event {
 	return result
 }
 
-func (s *Storage) GetForTheMonth(day time.Time) []storage.Event {
+func (s *Storage) GetForTheMonth(datetime time.Time) []storage.Event {
 	var result []storage.Event
 	for _, event := range s.events {
-		if event.DateTime.Month() == day.Month() {
+		if event.DateTime.Month() == datetime.Month() {
 			result = append(result, event)
 		}
 	}
 
 	return result
+}
+
+func (s *Storage) IsTimeBusy(datetime time.Time) bool {
+	for _, event := range s.events {
+		if event.DateTime.Day() == datetime.Day() && event.DateTime.Hour() == datetime.Hour() {
+			return true
+		}
+	}
+
+	return false
 }
