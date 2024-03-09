@@ -28,24 +28,24 @@ func New(logger *slog.Logger, s Storage) *App {
 func (a *App) CreateEvent(
 	_ context.Context,
 	title string,
-	datetime string,
-	duration string,
+	startDate string,
+	endDate string,
 	description string,
 	userID string,
 	notify string,
 ) (string, error) {
-	i, err := strconv.ParseInt(datetime, 10, 64)
+	i, err := strconv.ParseInt(startDate, 10, 64)
+	if err != nil {
+		return "", err
+	}
+	startTm := time.Unix(i, 0)
+
+	i, err = strconv.ParseInt(endDate, 10, 64)
 	if err != nil {
 		return "", err
 	}
 
-	// @todo: store unixtime instead of time
-	tm := time.Unix(i, 0)
-	d, err := time.ParseDuration(duration)
-	if err != nil {
-		return "", err
-	}
-
+	endTm := time.Unix(i, 0)
 	n, err := time.ParseDuration(notify)
 	if err != nil {
 		return "", err
@@ -53,8 +53,8 @@ func (a *App) CreateEvent(
 	newEvent := storage.Event{
 		ID:          storage.NewEventID(),
 		Title:       title,
-		DateTime:    tm,
-		Duration:    d,
+		StartDate:   startTm,
+		EndDate:     endTm,
 		Description: description,
 		UserID:      userID,
 		Notify:      n,

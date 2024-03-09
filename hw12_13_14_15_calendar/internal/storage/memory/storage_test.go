@@ -91,7 +91,7 @@ func TestStorageGetForTheDay(t *testing.T) {
 	date, _ := time.Parse("2006-01-02", "2024-01-01")
 	allEvents := s.GetForTheDay(date)
 	for _, event := range allEvents {
-		require.Equal(t, date.Day(), event.DateTime.Day())
+		require.Equal(t, date.Day(), event.StartDate.Day())
 	}
 }
 
@@ -106,7 +106,7 @@ func TestStorageGetForTheWeek(t *testing.T) {
 	allEvents := s.GetForTheWeek(date)
 	for _, event := range allEvents {
 		_, dateWeek := date.ISOWeek()
-		_, eventWeek := event.DateTime.ISOWeek()
+		_, eventWeek := event.StartDate.ISOWeek()
 		require.Equal(t, dateWeek, eventWeek)
 	}
 }
@@ -118,8 +118,8 @@ func generateEvents(count int) []storage.Event {
 		events[i] = storage.Event{
 			ID:          storage.CreateEventIDFrom(faker.UUIDHyphenated()),
 			Title:       faker.Word(),
-			DateTime:    eventTime,
-			Duration:    time.Hour,
+			StartDate:   eventTime,
+			EndDate:     eventTime.Add(time.Hour),
 			Description: faker.Sentence(),
 			UserID:      "10",
 			Notify:      time.Hour,

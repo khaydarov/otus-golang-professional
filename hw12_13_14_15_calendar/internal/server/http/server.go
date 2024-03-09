@@ -20,8 +20,8 @@ type Application interface {
 	CreateEvent(
 		ctx context.Context,
 		title string,
-		datetime string,
-		duration string,
+		startDate string,
+		endDate string,
 		description string,
 		userID string,
 		notify string,

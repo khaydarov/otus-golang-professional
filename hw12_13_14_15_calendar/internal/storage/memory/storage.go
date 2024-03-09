@@ -66,7 +66,7 @@ func (s *Storage) GetAll() []storage.Event {
 func (s *Storage) GetForTheDay(datetime time.Time) []storage.Event {
 	var result []storage.Event
 	for _, event := range s.events {
-		if event.DateTime.Day() == datetime.Day() {
+		if event.StartDate.Day() == datetime.Day() {
 			result = append(result, event)
 		}
 	}
@@ -77,7 +77,7 @@ func (s *Storage) GetForTheDay(datetime time.Time) []storage.Event {
 func (s *Storage) GetForTheWeek(datetime time.Time) []storage.Event {
 	var result []storage.Event
 	for _, event := range s.events {
-		_, eventWeek := event.DateTime.ISOWeek()
+		_, eventWeek := event.StartDate.ISOWeek()
 		_, targetDayWeek := datetime.ISOWeek()
 
 		if eventWeek == targetDayWeek {
@@ -91,7 +91,7 @@ func (s *Storage) GetForTheWeek(datetime time.Time) []storage.Event {
 func (s *Storage) GetForTheMonth(datetime time.Time) []storage.Event {
 	var result []storage.Event
 	for _, event := range s.events {
-		if event.DateTime.Month() == datetime.Month() {
+		if event.StartDate.Month() == datetime.Month() {
 			result = append(result, event)
 		}
 	}
@@ -101,7 +101,7 @@ func (s *Storage) GetForTheMonth(datetime time.Time) []storage.Event {
 
 func (s *Storage) IsTimeBusy(datetime time.Time) bool {
 	for _, event := range s.events {
-		if event.DateTime.Day() == datetime.Day() && event.DateTime.Hour() == datetime.Hour() {
+		if event.StartDate.Day() == datetime.Day() && event.StartDate.Hour() == datetime.Hour() {
 			return true
 		}
 	}

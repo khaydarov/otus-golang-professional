@@ -32,3 +32,6 @@ lint: install-lint-deps
 	golangci-lint run ./...
 
 .PHONY: build run build-img run-img version test lint
+
+migrate:
+	go run ./cmd/migrator -dir=./migrations --command=up

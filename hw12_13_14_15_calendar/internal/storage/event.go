@@ -30,8 +30,8 @@ func CreateEventIDFrom(id string) EventID {
 type Event struct {
 	ID          EventID
 	Title       string
-	DateTime    time.Time
-	Duration    time.Duration
+	StartDate   time.Time
+	EndDate     time.Time
 	Description string
 	UserID      string
 	Notify      time.Duration

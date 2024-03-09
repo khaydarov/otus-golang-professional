@@ -36,7 +36,8 @@ func (s *Storage) Close(ctx context.Context) error {
 func (s *Storage) Insert(event storage.Event) error {
 	_, err := s.conn.Exec(
 		context.Background(),
-		"INSERT INTO t_events (id, title) VALUES ($1, $2)",
+		`INSERT INTO t_events (id, user_id, title, description, start_date, end_date) 
+				VALUES ($1, $2, $3, $4, $5, $6)`,
 		event.ID.Value(),
 		event.Title,
 	)
