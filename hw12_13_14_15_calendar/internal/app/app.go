@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"errors"
 	"log/slog"
 	"strconv"
 	"time"
@@ -16,40 +17,37 @@ type App struct {
 
 type Storage interface {
 	Insert(event storage.Event) error
+	IsTimeBusy(start time.Time) bool
 }
 
-func New(logger *slog.Logger, s Storage) *App {
+func New(logger *slog.Logger, r Storage) *App {
 	return &App{
 		logger,
-		s,
+		r,
 	}
 }
 
-func (a *App) CreateEvent(
-	_ context.Context,
-	title string,
-	startDate string,
-	endDate string,
-	description string,
-	userID string,
-	notify string,
-) (string, error) {
-	i, err := strconv.ParseInt(startDate, 10, 64)
-	if err != nil {
-		return "", err
-	}
-	startTm := time.Unix(i, 0)
-
-	i, err = strconv.ParseInt(endDate, 10, 64)
+func (a *App) CreateEvent(_ context.Context, title string, startDate string, endDate string, description string, userID string, notify string) (string, error) {
+	startTm, err := parseStringToTime(startDate)
 	if err != nil {
 		return "", err
 	}
 
-	endTm := time.Unix(i, 0)
+	if a.r.IsTimeBusy(startTm) {
+		return "", errors.New("time is busy")
+	}
+
+	endTm, err := parseStringToTime(endDate)
+	if err != nil {
+		return "", err
+
+	}
+
 	n, err := time.ParseDuration(notify)
 	if err != nil {
 		return "", err
 	}
+
 	newEvent := storage.Event{
 		ID:          storage.NewEventID(),
 		Title:       title,
@@ -66,4 +64,12 @@ func (a *App) CreateEvent(
 	}
 
 	return newEvent.ID.Value(), nil
+}
+
+func parseStringToTime(s string) (time.Time, error) {
+	i, err := strconv.ParseInt(s, 10, 64)
+	if err != nil {
+		return time.Time{}, err
+	}
+	return time.Unix(i, 0), nil
 }

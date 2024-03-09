@@ -32,12 +32,15 @@ func init() {
 func main() {
 	flag.Parse()
 
-	cfg := config.MustLoad(configFile)
-	logg := logger.New(cfg.LogLevel)
+	cfg, err := config.Load(configFile)
+	if err != nil {
+		log.Fatalln("failed to load config")
+	}
 
+	logg := logger.New(cfg.LogLevel)
 	storage, err := initStorage(cfg.StorageType)
 	if err != nil {
-		log.Fatalln("failed to init storage: " + err.Error())
+		log.Fatalln("failed to init storage")
 	}
 
 	calendar := app.New(logg, storage)

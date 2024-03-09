@@ -1,8 +1,7 @@
 package config
 
 import (
-	"log"
-
+	"fmt"
 	"github.com/ilyakaznacheev/cleanenv"
 )
 
@@ -17,12 +16,12 @@ type HTTPServer struct {
 	Port int    `yaml:"port" env-default:"8080" env:"HTTP_PORT" env-description:"HTTP server port"`
 }
 
-func MustLoad(configFile string) *Config {
+func Load(configFile string) (*Config, error) {
 	var cfg Config
 
 	if err := cleanenv.ReadConfig(configFile, &cfg); err != nil {
-		log.Fatalf("cannot read config file: %s", err)
+		return nil, fmt.Errorf("cannot read config file: %w", err)
 	}
 
-	return &cfg
+	return &cfg, nil
 }
