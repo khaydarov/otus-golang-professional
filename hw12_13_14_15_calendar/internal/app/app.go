@@ -27,7 +27,15 @@ func New(logger *slog.Logger, r Storage) *App {
 	}
 }
 
-func (a *App) CreateEvent(_ context.Context, title string, startDate string, endDate string, description string, userID string, notify string) (string, error) {
+func (a *App) CreateEvent(
+	_ context.Context,
+	title string,
+	startDate string,
+	endDate string,
+	description string,
+	userID string,
+	notify string,
+) (string, error) {
 	startTm, err := parseStringToTime(startDate)
 	if err != nil {
 		return "", err
@@ -40,7 +48,6 @@ func (a *App) CreateEvent(_ context.Context, title string, startDate string, end
 	endTm, err := parseStringToTime(endDate)
 	if err != nil {
 		return "", err
-
 	}
 
 	n, err := time.ParseDuration(notify)

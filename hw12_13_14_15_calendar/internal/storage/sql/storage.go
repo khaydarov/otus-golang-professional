@@ -58,7 +58,6 @@ func (s *Storage) Update(event storage.Event) error {
 		event.StartDate,
 		event.EndDate,
 	)
-
 	if err != nil {
 		return err
 	}
@@ -72,7 +71,6 @@ func (s *Storage) Delete(id storage.EventID) error {
 		`DELETE FROM t_events WHERE id = $1`,
 		id.Value(),
 	)
-
 	if err != nil {
 		return err
 	}
@@ -85,7 +83,6 @@ func (s *Storage) GetAll() []storage.Event {
 		context.Background(),
 		`SELECT * FROM t_events`,
 	)
-
 	if err != nil {
 		return []storage.Event{}
 	}
@@ -118,7 +115,6 @@ func (s *Storage) GetForTheDay(datetime time.Time) []storage.Event {
 		`SELECT * FROM t_events WHERE start_date = $1`,
 		datetime,
 	)
-
 	if err != nil {
 		return []storage.Event{}
 	}
@@ -152,7 +148,6 @@ func (s *Storage) GetForTheWeek(datetime time.Time) []storage.Event {
 		datetime,
 		datetime,
 	)
-
 	if err != nil {
 		return []storage.Event{}
 	}
@@ -179,10 +174,10 @@ func (s *Storage) GetForTheWeek(datetime time.Time) []storage.Event {
 	return events
 }
 
-func (s *Storage) GetForTheMonth(datetime time.Time) []storage.Event {
+func (s *Storage) GetForTheMonth(_ time.Time) []storage.Event {
 	return []storage.Event{}
 }
 
-func (s *Storage) IsTimeBusy(datetime time.Time) bool {
+func (s *Storage) IsTimeBusy(_ time.Time) bool {
 	return false
 }
