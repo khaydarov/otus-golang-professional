@@ -3,41 +3,50 @@ package main
 import (
 	"context"
 	"flag"
+	"log"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
-	"github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/app"
-	"github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/logger"
-	internalhttp "github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/server/http"
-	memorystorage "github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/storage/memory"
+	"github.com/joho/godotenv"
+	"github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/app"
+	"github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/config"
+	"github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/logger"
+	internalhttp "github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/server/http"
+	memorystorage "github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/storage/memory"
+	sqlstorage "github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/storage/sql"
 )
 
 var configFile string
 
 func init() {
-	flag.StringVar(&configFile, "config", "/etc/calendar/config.toml", "Path to configuration file")
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatalln("error loading .env file")
+	}
+
+	flag.StringVar(&configFile, "config", "configs/config.yaml", "Path to configuration file")
 }
 
 func main() {
 	flag.Parse()
 
-	if flag.Arg(0) == "version" {
-		printVersion()
-		return
+	cfg, err := config.Load(configFile)
+	if err != nil {
+		log.Fatalln("failed to load config")
 	}
 
-	config := NewConfig()
-	logg := logger.New(config.Logger.Level)
+	logg := logger.New(cfg.LogLevel)
+	storage, err := initStorage(cfg.StorageType)
+	if err != nil {
+		log.Fatalln("failed to init storage")
+	}
 
-	storage := memorystorage.New()
 	calendar := app.New(logg, storage)
+	server := internalhttp.NewServer(&cfg.HTTPServer, logg, calendar)
 
-	server := internalhttp.NewServer(logg, calendar)
-
-	ctx, cancel := signal.NotifyContext(context.Background(),
-		syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
+	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
 	defer cancel()
 
 	go func() {
@@ -58,4 +67,18 @@ func main() {
 		cancel()
 		os.Exit(1) //nolint:gocritic
 	}
+}
+
+func initStorage(storageType string) (app.Storage, error) {
+	if storageType == "memory" {
+		return memorystorage.New(), nil
+	}
+
+	storage := sqlstorage.New()
+	err := storage.Connect(context.Background(), os.Getenv("DATABASE_URL"))
+	if err != nil {
+		return nil, err
+	}
+
+	return storage, nil
 }

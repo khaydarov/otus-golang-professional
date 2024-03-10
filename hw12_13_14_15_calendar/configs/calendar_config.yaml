@@ -1,0 +1,5 @@
+logLevel: debug
+httpServer:
+  host: localhost
+  port: 8081
+storageType: memory
