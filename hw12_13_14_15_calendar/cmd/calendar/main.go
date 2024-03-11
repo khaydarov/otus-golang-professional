@@ -3,19 +3,18 @@ package main
 import (
 	"context"
 	"flag"
-	"log"
-	"os"
-	"os/signal"
-	"syscall"
-	"time"
-
+	"fmt"
 	"github.com/joho/godotenv"
 	"github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/app"
 	"github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/config"
-	"github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/logger"
 	internalhttp "github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/server/http"
 	memorystorage "github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/storage/memory"
 	sqlstorage "github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/storage/sql"
+	"log"
+	"os"
+	"os/signal"
+	"sync"
+	"syscall"
 )
 
 var configFile string
@@ -37,36 +36,37 @@ func main() {
 		log.Fatalln("failed to load config")
 	}
 
-	logg := logger.New(cfg.LogLevel)
-	storage, err := initStorage(cfg.StorageType)
+	s, err := initStorage(cfg.StorageType)
 	if err != nil {
 		log.Fatalln("failed to init storage")
 	}
 
-	calendar := app.New(logg, storage)
-	server := internalhttp.NewServer(&cfg.HTTPServer, logg, calendar)
-
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
-	defer cancel()
 
+	calendar := app.New(cfg.LogLevel, s)
+	server := internalhttp.NewServer(&cfg.HTTPServer, calendar)
+
+	wg := sync.WaitGroup{}
+	wg.Add(2)
 	go func() {
-		<-ctx.Done()
+		defer wg.Done()
 
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
-		defer cancel()
-
-		if err := server.Stop(ctx); err != nil {
-			logg.Error("failed to stop http server: " + err.Error())
+		log.Println("calendar is running...")
+		if err := server.Start(ctx); err != nil {
+			log.Println("failed to start http server: " + err.Error())
+			cancel()
 		}
 	}()
 
-	logg.Info("calendar is running...")
+	go func() {
+		defer wg.Done()
+		if err := server.Stop(ctx); err != nil {
+			log.Println("failed to stop http server: " + err.Error())
+		}
+	}()
 
-	if err := server.Start(ctx); err != nil {
-		logg.Error("failed to start http server: " + err.Error())
-		cancel()
-		os.Exit(1) //nolint:gocritic
-	}
+	wg.Wait()
+	log.Println("calendar is stopped")
 }
 
 func initStorage(storageType string) (app.Storage, error) {
@@ -74,11 +74,12 @@ func initStorage(storageType string) (app.Storage, error) {
 		return memorystorage.New(), nil
 	}
 
-	storage := sqlstorage.New()
-	err := storage.Connect(context.Background(), os.Getenv("DATABASE_URL"))
+	s := sqlstorage.New()
+	err := s.Connect(context.Background(), os.Getenv("DATABASE_URL"))
 	if err != nil {
+		fmt.Println(err)
 		return nil, err
 	}
 
-	return storage, nil
+	return s, nil
 }

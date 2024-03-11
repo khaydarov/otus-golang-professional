@@ -29,10 +29,10 @@ func CreateEventIDFrom(id string) EventID {
 
 type Event struct {
 	ID          EventID
+	CreatorID   string
 	Title       string
+	Description string
 	StartDate   time.Time
 	EndDate     time.Time
-	Description string
-	UserID      string
-	Notify      time.Duration
+	NotifyAt    time.Time
 }

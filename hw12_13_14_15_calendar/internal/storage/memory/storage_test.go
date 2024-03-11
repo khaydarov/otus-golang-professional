@@ -121,8 +121,8 @@ func generateEvents(count int) []storage.Event {
 			StartDate:   eventTime,
 			EndDate:     eventTime.Add(time.Hour),
 			Description: faker.Sentence(),
-			UserID:      "10",
-			Notify:      time.Hour,
+			CreatorID:   "10",
+			NotifyAt:    eventTime,
 		}
 	}
 	return events

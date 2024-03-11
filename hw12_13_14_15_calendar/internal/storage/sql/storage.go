@@ -37,10 +37,15 @@ func (s *Storage) Close(ctx context.Context) error {
 func (s *Storage) Insert(event storage.Event) error {
 	_, err := s.conn.Exec(
 		context.Background(),
-		`INSERT INTO t_events (id, user_id, title, description, start_date, end_date) 
-				VALUES ($1, $2, $3, $4, $5, $6)`,
+		`INSERT INTO t_events (id, user_id, title, description, start_date, end_date, notify_at) 
+				VALUES ($1, $2, $3, $4, $5, $6, $7)`,
 		event.ID.Value(),
+		event.CreatorID,
 		event.Title,
+		event.Description,
+		event.StartDate,
+		event.EndDate,
+		event.NotifyAt,
 	)
 	if err != nil {
 		return err
@@ -78,6 +83,29 @@ func (s *Storage) Delete(id storage.EventID) error {
 	return nil
 }
 
+func (s *Storage) GetById(id storage.EventID) (storage.Event, error) {
+	var event storage.Event
+	row := s.conn.QueryRow(
+		context.Background(),
+		`SELECT * FROM t_events WHERE id = $1`,
+		id.Value(),
+	)
+
+	err := row.Scan(
+		&event.ID,
+		&event.Title,
+		&event.Description,
+		&event.StartDate,
+		&event.EndDate,
+		&event.CreatorID,
+	)
+	if err != nil {
+		return storage.Event{}, err
+	}
+
+	return event, nil
+}
+
 func (s *Storage) GetAll() []storage.Event {
 	rows, err := s.conn.Query(
 		context.Background(),
@@ -96,7 +124,7 @@ func (s *Storage) GetAll() []storage.Event {
 			&event.Description,
 			&event.StartDate,
 			&event.EndDate,
-			&event.UserID,
+			&event.CreatorID,
 		)
 
 		if err != nil {
@@ -128,7 +156,7 @@ func (s *Storage) GetForTheDay(datetime time.Time) []storage.Event {
 			&event.Description,
 			&event.StartDate,
 			&event.EndDate,
-			&event.UserID,
+			&event.CreatorID,
 		)
 
 		if err != nil {
@@ -161,7 +189,7 @@ func (s *Storage) GetForTheWeek(datetime time.Time) []storage.Event {
 			&event.Description,
 			&event.StartDate,
 			&event.EndDate,
-			&event.UserID,
+			&event.CreatorID,
 		)
 
 		if err != nil {
@@ -174,10 +202,22 @@ func (s *Storage) GetForTheWeek(datetime time.Time) []storage.Event {
 	return events
 }
 
-func (s *Storage) GetForTheMonth(_ time.Time) []storage.Event {
+func (s *Storage) GetForTheMonth(_da time.Time) []storage.Event {
 	return []storage.Event{}
 }
 
-func (s *Storage) IsTimeBusy(_ time.Time) bool {
+func (s *Storage) IsTimeBusy(datetime time.Time) bool {
+	var exist bool
+	row := s.conn.QueryRow(
+		context.Background(),
+		`SELECT EXISTS(SELECT * FROM t_events WHERE $1 >= start_date AND $1 <= end_date)`,
+		datetime,
+	)
+
+	row.Scan(&exist)
+	if exist {
+		return true
+	}
+
 	return false
 }

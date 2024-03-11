@@ -14,6 +14,7 @@ type EventRepository interface {
 	Insert(event Event) error
 	Update(event Event) error
 	Delete(id EventID) error
+	GetById(id EventID) (Event, error)
 	GetAll() []Event
 	GetForTheDay(datetime time.Time) []Event
 	GetForTheWeek(datetime time.Time) []Event
