@@ -7,13 +7,13 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/config"
+	apiconfig "github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/config/api"
 	"github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/server/handler"
 	"github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/storage"
 )
 
 type Server struct {
-	cfg *config.HTTPServer
+	cfg *apiconfig.HTTPServer
 	app Application
 }
 
@@ -26,7 +26,7 @@ type Application interface {
 	GetEventsForTheMonth(date string) []storage.Event
 }
 
-func NewServer(httpServerCfg *config.HTTPServer, app Application) *Server {
+func NewServer(httpServerCfg *apiconfig.HTTPServer, app Application) *Server {
 	return &Server{
 		httpServerCfg,
 		app,

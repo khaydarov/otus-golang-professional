@@ -1,0 +1,4 @@
+logLevel: debug
+rabbitmq:
+  exchange: notifier
+  queue: events

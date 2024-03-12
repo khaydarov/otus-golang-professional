@@ -12,5 +12,17 @@ services:
       - POSTGRES_PASSWORD=postgres
       - TZ=Europe/Moscow
 
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: calendar_rabbitmq
+    ports:
+      - "15671:15671"
+      - "15672:15672"
+      - "5672:5672"
+    environment:
+      RABBITMQ_DEFAULT_USER: rabbitmq
+      RABBITMQ_DEFAULT_PASS: rabbitmqpass
+      RABBITMQ_DEFAULT_VHOST: "/"
+
 volumes:
   psqlvolume:
