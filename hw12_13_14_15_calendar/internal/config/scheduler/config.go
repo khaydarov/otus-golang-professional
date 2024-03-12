@@ -1,4 +1,4 @@
-package api
+package scheduler
 
 import (
 	"fmt"
@@ -8,6 +8,7 @@ import (
 
 type Config struct {
 	LogLevel string `yaml:"logLevel"`
+	Queue    string `yaml:"queue"`
 }
 
 func Load(configFile string) (*Config, error) {
