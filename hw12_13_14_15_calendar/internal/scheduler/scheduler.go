@@ -7,6 +7,7 @@ import (
 	"github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/storage"
 	amqp "github.com/rabbitmq/amqp091-go"
 	"log/slog"
+	"sync"
 	"time"
 )
 
@@ -30,9 +31,34 @@ func NewScheduler(cfg *schedulerconfig.Config, log *slog.Logger, storage Storage
 	}
 }
 
-func (s *Scheduler) Run() error {
-	today := time.Now()
+func (s *Scheduler) Run() {
+	wg := sync.WaitGroup{}
+	go func() {
+		wg.Add(1)
+		defer wg.Done()
 
+		err := s.sendNotifications()
+		s.log.Error("failed to send notifications: %v", err)
+	}()
+
+	go func() {
+		wg.Add(1)
+		defer wg.Done()
+
+		err := s.cleanup()
+		s.log.Error("failed to cleanup: %v", err)
+	}()
+
+	wg.Wait()
+}
+
+func (s *Scheduler) cleanup() error {
+	// implement logic here
+	return nil
+}
+
+func (s *Scheduler) sendNotifications() error {
+	today := time.Now()
 	ch, err := s.rmqConn.Channel()
 	if err != nil {
 		return err
