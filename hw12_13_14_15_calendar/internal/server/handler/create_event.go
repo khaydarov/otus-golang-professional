@@ -37,7 +37,6 @@ func CreateEventHandler(c EventCreator) func(w http.ResponseWriter, r *http.Requ
 			req.EndDate,
 			req.NotifyAt,
 		)
-
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 		}

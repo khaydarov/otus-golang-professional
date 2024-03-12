@@ -55,6 +55,18 @@ func (s *Storage) Delete(id storage.EventID) error {
 	return nil
 }
 
+func (s *Storage) GetByID(id storage.EventID) (storage.Event, error) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	event, ok := s.events[id]
+	if !ok {
+		return storage.Event{}, storage.ErrEventDoesNotExist
+	}
+
+	return event, nil
+}
+
 func (s *Storage) GetAll() []storage.Event {
 	result := make([]storage.Event, 0, len(s.events))
 	for _, event := range s.events {

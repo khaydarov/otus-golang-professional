@@ -19,7 +19,10 @@ type Storage interface {
 	IsTimeBusy(datetime time.Time) bool
 	Delete(id storage.EventID) error
 	Update(event storage.Event) error
-	GetById(id storage.EventID) (storage.Event, error)
+	GetByID(id storage.EventID) (storage.Event, error)
+	GetForTheDay(datetime time.Time) []storage.Event
+	GetForTheWeek(datetime time.Time) []storage.Event
+	GetForTheMonth(datetime time.Time) []storage.Event
 }
 
 func New(logLevel string, storage Storage) *App {
@@ -30,17 +33,44 @@ func New(logLevel string, storage Storage) *App {
 	}
 }
 
+func (a *App) GetEventsForTheDay(date string) []storage.Event {
+	tm, err := parseStringToDateOnly(date)
+	if err != nil {
+		return []storage.Event{}
+	}
+
+	return a.storage.GetForTheDay(tm)
+}
+
+func (a *App) GetEventsForTheWeek(date string) []storage.Event {
+	tm, err := parseStringToDateOnly(date)
+	if err != nil {
+		return []storage.Event{}
+	}
+
+	return a.storage.GetForTheWeek(tm)
+}
+
+func (a *App) GetEventsForTheMonth(date string) []storage.Event {
+	tm, err := parseStringToDateOnly(date)
+	if err != nil {
+		return []storage.Event{}
+	}
+
+	return a.storage.GetForTheMonth(tm)
+}
+
 func (a *App) UpdateEvent(id, title, description, startDate, endDate, notify string) error {
-	event, err := a.storage.GetById(storage.CreateEventIDFrom(id))
+	event, err := a.storage.GetByID(storage.CreateEventIDFrom(id))
 	if err != nil {
 		return err
 	}
 
 	event.Title = title
 	event.Description = description
-	event.StartDate, err = parseStringToTime(startDate)
-	event.EndDate, err = parseStringToTime(endDate)
-	event.NotifyAt, err = parseStringToTime(notify)
+	event.StartDate, _ = parseStringToTime(startDate)
+	event.EndDate, _ = parseStringToTime(endDate)
+	event.NotifyAt, _ = parseStringToTime(notify)
 
 	err = a.storage.Update(event)
 	if err != nil {
@@ -95,6 +125,14 @@ func (a *App) CreateEvent(title, description, creatorID, startDate, endDate, not
 
 func parseStringToTime(s string) (time.Time, error) {
 	t, err := time.Parse(time.DateTime, s)
+	if err != nil {
+		return time.Time{}, err
+	}
+	return t, nil
+}
+
+func parseStringToDateOnly(s string) (time.Time, error) {
+	t, err := time.Parse(time.DateOnly, s)
 	if err != nil {
 		return time.Time{}, err
 	}

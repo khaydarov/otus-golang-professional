@@ -3,12 +3,13 @@ package internalhttp
 import (
 	"context"
 	"fmt"
-	"github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/server/handler"
 	"log"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/config"
+	"github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/server/handler"
+	"github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/storage"
 )
 
 type Server struct {
@@ -20,6 +21,9 @@ type Application interface {
 	CreateEvent(title, description, creatorID, startDate, endDate, notify string) (string, error)
 	DeleteEvent(id string) error
 	UpdateEvent(id, title, description, startDate, endDate, notify string) error
+	GetEventsForTheDay(date string) []storage.Event
+	GetEventsForTheWeek(date string) []storage.Event
+	GetEventsForTheMonth(date string) []storage.Event
 }
 
 func NewServer(httpServerCfg *config.HTTPServer, app Application) *Server {
@@ -37,10 +41,8 @@ func (s *Server) Start(ctx context.Context) error {
 		r.Post("/", handler.CreateEventHandler(s.app))
 		r.Post("/{id}", handler.UpdateEventHandler(s.app))
 		r.Delete("/{id}", handler.DeleteEventHandler(s.app))
+		r.Get("/", handler.GetEventsHandler(s.app))
 	})
-
-	//router.Post("/events/{id}", handler.UpdateEventHandler(s.app))
-	//router.Get("/events", handler.GetEventsHandler(s.app))
 
 	server := &http.Server{
 		Addr:        fmt.Sprintf("%s:%d", s.cfg.Host, s.cfg.Port),

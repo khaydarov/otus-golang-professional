@@ -4,17 +4,18 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"log"
+	"os"
+	"os/signal"
+	"sync"
+	"syscall"
+
 	"github.com/joho/godotenv"
 	"github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/app"
 	"github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/config"
 	internalhttp "github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/server/http"
 	memorystorage "github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/storage/memory"
 	sqlstorage "github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/storage/sql"
-	"log"
-	"os"
-	"os/signal"
-	"sync"
-	"syscall"
 )
 
 var configFile string
