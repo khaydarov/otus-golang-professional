@@ -35,3 +35,6 @@ lint: install-lint-deps
 
 migrate:
 	go run ./cmd/migrator -dir=./migrations --command=up
+
+generate:
+	protoc -I proto ./protos/proto/calendar/*.proto --go_out=./protos/gen/go --go_opt=paths=source_relative --go-grpc_out=./protos/gen/go/ --go-grpc_opt=paths=source_relative

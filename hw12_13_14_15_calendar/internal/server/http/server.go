@@ -3,36 +3,33 @@ package internalhttp
 import (
 	"context"
 	"fmt"
-	"log/slog"
+	"log"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/config"
+	"github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/server/handler"
+	"github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/storage"
 )
 
 type Server struct {
 	cfg *config.HTTPServer
 	app Application
-	log *slog.Logger
 }
 
 type Application interface {
-	CreateEvent(
-		ctx context.Context,
-		title string,
-		startDate string,
-		endDate string,
-		description string,
-		userID string,
-		notify string,
-	) (string, error)
+	CreateEvent(title, description, creatorID, startDate, endDate, notify string) (string, error)
+	DeleteEvent(id string) error
+	UpdateEvent(id, title, description, startDate, endDate, notify string) error
+	GetEventsForTheDay(date string) []storage.Event
+	GetEventsForTheWeek(date string) []storage.Event
+	GetEventsForTheMonth(date string) []storage.Event
 }
 
-func NewServer(httpServerCfg *config.HTTPServer, logger *slog.Logger, app Application) *Server {
+func NewServer(httpServerCfg *config.HTTPServer, app Application) *Server {
 	return &Server{
 		httpServerCfg,
 		app,
-		logger,
 	}
 }
 
@@ -40,8 +37,11 @@ func (s *Server) Start(ctx context.Context) error {
 	router := chi.NewRouter()
 
 	router.Use(LoggerMiddleware("./logs/log.txt"))
-	router.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("Hello, world!"))
+	router.Route("/events", func(r chi.Router) {
+		r.Post("/", handler.CreateEventHandler(s.app))
+		r.Post("/{id}", handler.UpdateEventHandler(s.app))
+		r.Delete("/{id}", handler.DeleteEventHandler(s.app))
+		r.Get("/", handler.GetEventsHandler(s.app))
 	})
 
 	server := &http.Server{
@@ -52,7 +52,7 @@ func (s *Server) Start(ctx context.Context) error {
 
 	go func() {
 		if err := server.ListenAndServe(); err != nil {
-			s.log.Error("failed to start server: %s", err)
+			log.Printf("failed to start server: %s", err)
 		}
 	}()
 
