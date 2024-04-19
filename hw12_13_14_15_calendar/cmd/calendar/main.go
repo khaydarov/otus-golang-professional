@@ -12,7 +12,7 @@ import (
 
 	"github.com/joho/godotenv"
 	"github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/app"
-	"github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/config"
+	apiconfig "github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/config/api"
 	internalhttp "github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/server/http"
 	memorystorage "github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/storage/memory"
 	sqlstorage "github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/storage/sql"
@@ -32,7 +32,7 @@ func init() {
 func main() {
 	flag.Parse()
 
-	cfg, err := config.Load(configFile)
+	cfg, err := apiconfig.Load(configFile)
 	if err != nil {
 		log.Fatalln("failed to load config")
 	}
