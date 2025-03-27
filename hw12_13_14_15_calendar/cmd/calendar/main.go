@@ -26,7 +26,7 @@ func init() {
 		log.Fatalln("error loading .env file")
 	}
 
-	flag.StringVar(&configFile, "config", "configs/config.yaml", "Path to configuration file")
+	flag.StringVar(&configFile, "config", "configs/calendar_config.yaml", "Path to configuration file")
 }
 
 func main() {
@@ -34,12 +34,12 @@ func main() {
 
 	cfg, err := config.Load(configFile)
 	if err != nil {
-		log.Fatalln("failed to load config")
+		log.Fatalln("failed to load config", err)
 	}
 
 	s, err := initStorage(cfg.StorageType)
 	if err != nil {
-		log.Fatalln("failed to init storage")
+		log.Fatalln("failed to init storage", err)
 	}
 
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
