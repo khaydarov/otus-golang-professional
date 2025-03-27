@@ -3,58 +3,56 @@ package main
 import (
 	"context"
 	"flag"
-	"fmt"
 	"log"
+	"log/slog"
 	"os"
 	"os/signal"
 	"sync"
 	"syscall"
 
 	"github.com/joho/godotenv"
-	"github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/app"
+	"github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/cmd/calendar/app"
+	eventApi "github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/api/event"
 	"github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/config"
-	internalhttp "github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/server/http"
-	memorystorage "github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/storage/memory"
-	sqlstorage "github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/storage/sql"
+	"github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/logger"
+	eventRepository "github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/repository/event"
 )
 
 var configFile string
 
-func init() {
+func main() {
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatalln("error loading .env file")
 	}
 
 	flag.StringVar(&configFile, "config", "configs/calendar_config.yaml", "Path to configuration file")
-}
-
-func main() {
 	flag.Parse()
 
+	logger := initLogger(os.Getenv("LOG_LEVEL"))
 	cfg, err := config.Load(configFile)
 	if err != nil {
-		log.Fatalln("failed to load config", err)
+		logger.Error("load config: ", err)
 	}
 
-	s, err := initStorage(cfg.StorageType)
+	storage, err := initStorage(cfg.StorageType)
 	if err != nil {
-		log.Fatalln("failed to init storage", err)
+		logger.Error("init storage: ", err)
 	}
 
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
 
-	calendar := app.New(cfg.LogLevel, s)
-	server := internalhttp.NewServer(&cfg.HTTPServer, calendar)
+	calendar := app.NewCalendar(storage, logger)
+	server := eventApi.NewServer(&cfg.HTTPServer, calendar, logger)
 
 	wg := sync.WaitGroup{}
 	wg.Add(2)
 	go func() {
 		defer wg.Done()
 
-		log.Println("calendar is running...")
+		logger.Info("calendar is running...")
 		if err := server.Start(ctx); err != nil {
-			log.Println("failed to start http server: " + err.Error())
+			logger.Debug("failed to start http server: ", err)
 			cancel()
 		}
 	}()
@@ -62,25 +60,28 @@ func main() {
 	go func() {
 		defer wg.Done()
 		if err := server.Stop(ctx); err != nil {
-			log.Println("failed to stop http server: " + err.Error())
+			logger.Debug("failed to stop http server: ", err)
 		}
 	}()
 
 	wg.Wait()
-	log.Println("calendar is stopped")
+	logger.Warn("calendar is stopped")
 }
 
 func initStorage(storageType string) (app.Storage, error) {
 	if storageType == "memory" {
-		return memorystorage.New(), nil
+		return eventRepository.NewInMemoryRepository(), nil
 	}
 
-	s := sqlstorage.New()
+	s := eventRepository.NewPsqlRepository()
 	err := s.Connect(context.Background(), os.Getenv("DATABASE_URL"))
 	if err != nil {
-		fmt.Println(err)
 		return nil, err
 	}
 
 	return s, nil
+}
+
+func initLogger(logLevel string) *slog.Logger {
+	return logger.New(logLevel)
 }

@@ -5,63 +5,61 @@ import (
 	"log/slog"
 	"time"
 
-	"github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/logger"
-	"github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/storage"
+	"github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/model"
 )
 
-type App struct {
+type Storage interface {
+	Insert(event model.Event) error
+	IsTimeBusy(datetime time.Time) bool
+	Delete(id model.EventID) error
+	Update(event model.Event) error
+	GetByID(id model.EventID) (model.Event, error)
+	GetForTheDay(datetime time.Time) model.Events
+	GetForTheWeek(datetime time.Time) model.Events
+	GetForTheMonth(datetime time.Time) model.Events
+}
+
+type Calendar struct {
 	log     *slog.Logger
 	storage Storage
 }
 
-type Storage interface {
-	Insert(event storage.Event) error
-	IsTimeBusy(datetime time.Time) bool
-	Delete(id storage.EventID) error
-	Update(event storage.Event) error
-	GetByID(id storage.EventID) (storage.Event, error)
-	GetForTheDay(datetime time.Time) []storage.Event
-	GetForTheWeek(datetime time.Time) []storage.Event
-	GetForTheMonth(datetime time.Time) []storage.Event
-}
-
-func New(logLevel string, storage Storage) *App {
-	log := logger.New(logLevel)
-	return &App{
-		log,
+func NewCalendar(storage Storage, logger *slog.Logger) *Calendar {
+	return &Calendar{
+		logger,
 		storage,
 	}
 }
 
-func (a *App) GetEventsForTheDay(date string) []storage.Event {
+func (a *Calendar) GetEventsForTheDay(date string) model.Events {
 	tm, err := parseStringToDateOnly(date)
 	if err != nil {
-		return []storage.Event{}
+		return model.Events{}
 	}
 
 	return a.storage.GetForTheDay(tm)
 }
 
-func (a *App) GetEventsForTheWeek(date string) []storage.Event {
+func (a *Calendar) GetEventsForTheWeek(date string) model.Events {
 	tm, err := parseStringToDateOnly(date)
 	if err != nil {
-		return []storage.Event{}
+		return model.Events{}
 	}
 
 	return a.storage.GetForTheWeek(tm)
 }
 
-func (a *App) GetEventsForTheMonth(date string) []storage.Event {
+func (a *Calendar) GetEventsForTheMonth(date string) model.Events {
 	tm, err := parseStringToDateOnly(date)
 	if err != nil {
-		return []storage.Event{}
+		return model.Events{}
 	}
 
 	return a.storage.GetForTheMonth(tm)
 }
 
-func (a *App) UpdateEvent(id, title, description, startDate, endDate, notify string) error {
-	event, err := a.storage.GetByID(storage.CreateEventIDFrom(id))
+func (a *Calendar) UpdateEvent(id, title, description, startDate, endDate, notify string) error {
+	event, err := a.storage.GetByID(model.CreateEventIDFrom(id))
 	if err != nil {
 		return err
 	}
@@ -80,11 +78,11 @@ func (a *App) UpdateEvent(id, title, description, startDate, endDate, notify str
 	return nil
 }
 
-func (a *App) DeleteEvent(id string) error {
-	return a.storage.Delete(storage.CreateEventIDFrom(id))
+func (a *Calendar) DeleteEvent(id string) error {
+	return a.storage.Delete(model.CreateEventIDFrom(id))
 }
 
-func (a *App) CreateEvent(title, description, creatorID, startDate, endDate, notify string) (string, error) {
+func (a *Calendar) CreateEvent(title, description, creatorID, startDate, endDate, notify string) (string, error) {
 	startTm, err := parseStringToTime(startDate)
 	if err != nil {
 		return "", err
@@ -105,8 +103,8 @@ func (a *App) CreateEvent(title, description, creatorID, startDate, endDate, not
 	}
 
 	notifyAt := startTm.Add(-n)
-	newEvent := storage.Event{
-		ID:          storage.NewEventID(),
+	newEvent := model.Event{
+		ID:          model.NewEventID(),
 		CreatorID:   creatorID,
 		Title:       title,
 		StartDate:   startTm,

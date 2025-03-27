@@ -1,4 +1,4 @@
-package storage
+package model
 
 import (
 	"time"
@@ -36,3 +36,5 @@ type Event struct {
 	EndDate     time.Time
 	NotifyAt    time.Time
 }
+
+type Events []Event

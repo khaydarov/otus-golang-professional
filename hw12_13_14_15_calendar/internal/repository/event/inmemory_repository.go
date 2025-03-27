@@ -1,39 +1,39 @@
-package memorystorage
+package event_repository
 
 import (
 	"sync"
 	"time"
 
-	"github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/storage"
+	"github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/model"
 )
 
-type Storage struct {
+type InMemoryRepository struct {
 	mu sync.RWMutex
 
-	events map[storage.EventID]storage.Event
+	events map[model.EventID]model.Event
 }
 
-func New() *Storage {
-	return &Storage{
-		events: make(map[storage.EventID]storage.Event),
+func NewInMemoryRepository() *InMemoryRepository {
+	return &InMemoryRepository{
+		events: make(map[model.EventID]model.Event),
 	}
 }
 
-func (s *Storage) Insert(event storage.Event) error {
+func (s *InMemoryRepository) Insert(event model.Event) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
 	if _, ok := s.events[event.ID]; ok {
-		return storage.ErrEventAlreadyExists
+		return ErrEventAlreadyExists
 	}
 
 	s.events[event.ID] = event
 	return nil
 }
 
-func (s *Storage) Update(event storage.Event) error {
+func (s *InMemoryRepository) Update(event model.Event) error {
 	if _, ok := s.events[event.ID]; !ok {
-		return storage.ErrEventDoesNotExist
+		return ErrEventDoesNotExist
 	}
 
 	s.mu.Lock()
@@ -43,9 +43,9 @@ func (s *Storage) Update(event storage.Event) error {
 	return nil
 }
 
-func (s *Storage) Delete(id storage.EventID) error {
+func (s *InMemoryRepository) Delete(id model.EventID) error {
 	if _, ok := s.events[id]; !ok {
-		return storage.ErrEventDoesNotExist
+		return ErrEventDoesNotExist
 	}
 
 	s.mu.Lock()
@@ -55,28 +55,28 @@ func (s *Storage) Delete(id storage.EventID) error {
 	return nil
 }
 
-func (s *Storage) GetByID(id storage.EventID) (storage.Event, error) {
+func (s *InMemoryRepository) GetByID(id model.EventID) (model.Event, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
 	event, ok := s.events[id]
 	if !ok {
-		return storage.Event{}, storage.ErrEventDoesNotExist
+		return model.Event{}, ErrEventDoesNotExist
 	}
 
 	return event, nil
 }
 
-func (s *Storage) GetAll() []storage.Event {
-	result := make([]storage.Event, 0, len(s.events))
+func (s *InMemoryRepository) GetAll() []model.Event {
+	result := make([]model.Event, 0, len(s.events))
 	for _, event := range s.events {
 		result = append(result, event)
 	}
 	return result
 }
 
-func (s *Storage) GetForTheDay(datetime time.Time) []storage.Event {
-	var result []storage.Event
+func (s *InMemoryRepository) GetForTheDay(datetime time.Time) model.Events {
+	var result model.Events
 	for _, event := range s.events {
 		if event.StartDate.Day() == datetime.Day() {
 			result = append(result, event)
@@ -86,8 +86,8 @@ func (s *Storage) GetForTheDay(datetime time.Time) []storage.Event {
 	return result
 }
 
-func (s *Storage) GetForTheWeek(datetime time.Time) []storage.Event {
-	var result []storage.Event
+func (s *InMemoryRepository) GetForTheWeek(datetime time.Time) model.Events {
+	var result model.Events
 	for _, event := range s.events {
 		_, eventWeek := event.StartDate.ISOWeek()
 		_, targetDayWeek := datetime.ISOWeek()
@@ -100,8 +100,8 @@ func (s *Storage) GetForTheWeek(datetime time.Time) []storage.Event {
 	return result
 }
 
-func (s *Storage) GetForTheMonth(datetime time.Time) []storage.Event {
-	var result []storage.Event
+func (s *InMemoryRepository) GetForTheMonth(datetime time.Time) model.Events {
+	var result model.Events
 	for _, event := range s.events {
 		if event.StartDate.Month() == datetime.Month() {
 			result = append(result, event)
@@ -111,7 +111,7 @@ func (s *Storage) GetForTheMonth(datetime time.Time) []storage.Event {
 	return result
 }
 
-func (s *Storage) IsTimeBusy(datetime time.Time) bool {
+func (s *InMemoryRepository) IsTimeBusy(datetime time.Time) bool {
 	for _, event := range s.events {
 		if event.StartDate.Day() == datetime.Day() && event.StartDate.Hour() == datetime.Hour() {
 			return true

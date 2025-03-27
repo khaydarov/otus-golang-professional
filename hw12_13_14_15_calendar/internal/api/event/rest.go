@@ -1,49 +1,41 @@
-package internalhttp
+package api
 
 import (
 	"context"
 	"fmt"
 	"log"
+	"log/slog"
 	"net/http"
 
-	"github.com/go-chi/chi/v5"
 	"github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/config"
-	"github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/server/handler"
-	"github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/storage"
+	"github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/model"
 )
 
 type Server struct {
-	cfg *config.HTTPServer
-	app Application
+	cfg    *config.HTTPServer
+	app    Application
+	logger *slog.Logger
 }
 
 type Application interface {
 	CreateEvent(title, description, creatorID, startDate, endDate, notify string) (string, error)
 	DeleteEvent(id string) error
 	UpdateEvent(id, title, description, startDate, endDate, notify string) error
-	GetEventsForTheDay(date string) []storage.Event
-	GetEventsForTheWeek(date string) []storage.Event
-	GetEventsForTheMonth(date string) []storage.Event
+	GetEventsForTheDay(date string) model.Events
+	GetEventsForTheWeek(date string) model.Events
+	GetEventsForTheMonth(date string) model.Events
 }
 
-func NewServer(httpServerCfg *config.HTTPServer, app Application) *Server {
+func NewServer(httpServerCfg *config.HTTPServer, app Application, logger *slog.Logger) *Server {
 	return &Server{
 		httpServerCfg,
 		app,
+		logger,
 	}
 }
 
 func (s *Server) Start(ctx context.Context) error {
-	router := chi.NewRouter()
-
-	router.Use(LoggerMiddleware("./logs/log.txt"))
-	router.Route("/events", func(r chi.Router) {
-		r.Post("/", handler.CreateEventHandler(s.app))
-		r.Post("/{id}", handler.UpdateEventHandler(s.app))
-		r.Delete("/{id}", handler.DeleteEventHandler(s.app))
-		r.Get("/", handler.GetEventsHandler(s.app))
-	})
-
+	router := NewRouter(s.app)
 	server := &http.Server{
 		Addr:        fmt.Sprintf("%s:%d", s.cfg.Host, s.cfg.Port),
 		ReadTimeout: 0,

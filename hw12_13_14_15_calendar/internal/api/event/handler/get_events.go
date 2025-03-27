@@ -1,16 +1,16 @@
-package handler
+package api_handler
 
 import (
 	"fmt"
 	"net/http"
 
-	"github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/storage"
+	"github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/model"
 )
 
 type EventsRetriever interface {
-	GetEventsForTheDay(date string) []storage.Event
-	GetEventsForTheWeek(date string) []storage.Event
-	GetEventsForTheMonth(date string) []storage.Event
+	GetEventsForTheDay(date string) model.Events
+	GetEventsForTheWeek(date string) model.Events
+	GetEventsForTheMonth(date string) model.Events
 }
 
 // GetEventsHandler returns a handler for getting events
@@ -23,7 +23,7 @@ func GetEventsHandler(e EventsRetriever) func(w http.ResponseWriter, r *http.Req
 		filter := r.URL.Query().Get("filter")
 		date := r.URL.Query().Get("date")
 
-		var events []storage.Event
+		var events model.Events
 
 		switch filter {
 		case "day":

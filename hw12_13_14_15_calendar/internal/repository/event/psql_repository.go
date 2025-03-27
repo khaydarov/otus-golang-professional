@@ -1,4 +1,4 @@
-package sqlstorage
+package event_repository
 
 import (
 	"context"
@@ -6,20 +6,20 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5"
-	"github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/storage"
+	"github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/model"
 )
 
 var ErrCouldNotConnect = errors.New("could not connect to the database")
 
-type Storage struct {
+type PsqlRepository struct {
 	conn *pgx.Conn
 }
 
-func New() *Storage {
-	return &Storage{}
+func NewPsqlRepository() *PsqlRepository {
+	return &PsqlRepository{}
 }
 
-func (s *Storage) Connect(ctx context.Context, databaseURL string) error {
+func (s *PsqlRepository) Connect(ctx context.Context, databaseURL string) error {
 	conn, err := pgx.Connect(ctx, databaseURL)
 	if err != nil {
 		return ErrCouldNotConnect
@@ -30,11 +30,11 @@ func (s *Storage) Connect(ctx context.Context, databaseURL string) error {
 	return nil
 }
 
-func (s *Storage) Close(ctx context.Context) error {
+func (s *PsqlRepository) Close(ctx context.Context) error {
 	return s.conn.Close(ctx)
 }
 
-func (s *Storage) Insert(event storage.Event) error {
+func (s *PsqlRepository) Insert(event model.Event) error {
 	_, err := s.conn.Exec(
 		context.Background(),
 		`INSERT INTO t_events (id, user_id, title, description, start_date, end_date, notify_at) 
@@ -54,7 +54,7 @@ func (s *Storage) Insert(event storage.Event) error {
 	return nil
 }
 
-func (s *Storage) Update(event storage.Event) error {
+func (s *PsqlRepository) Update(event model.Event) error {
 	_, err := s.conn.Exec(
 		context.Background(),
 		`UPDATE t_events SET title = $1, description = $2, start_date = $3, end_date = $4`,
@@ -70,7 +70,7 @@ func (s *Storage) Update(event storage.Event) error {
 	return nil
 }
 
-func (s *Storage) Delete(id storage.EventID) error {
+func (s *PsqlRepository) Delete(id model.EventID) error {
 	_, err := s.conn.Exec(
 		context.Background(),
 		`DELETE FROM t_events WHERE id = $1`,
@@ -83,8 +83,8 @@ func (s *Storage) Delete(id storage.EventID) error {
 	return nil
 }
 
-func (s *Storage) GetByID(id storage.EventID) (storage.Event, error) {
-	var event storage.Event
+func (s *PsqlRepository) GetByID(id model.EventID) (model.Event, error) {
+	var event model.Event
 	row := s.conn.QueryRow(
 		context.Background(),
 		`SELECT title, description, start_date, end_date, notify_at FROM t_events WHERE id = $1`,
@@ -100,24 +100,24 @@ func (s *Storage) GetByID(id storage.EventID) (storage.Event, error) {
 		&event.NotifyAt,
 	)
 	if err != nil {
-		return storage.Event{}, err
+		return model.Event{}, err
 	}
 
 	return event, nil
 }
 
-func (s *Storage) GetAll() []storage.Event {
+func (s *PsqlRepository) GetAll() model.Events {
 	rows, err := s.conn.Query(
 		context.Background(),
 		`SELECT * FROM t_events`,
 	)
 	if err != nil {
-		return []storage.Event{}
+		return model.Events{}
 	}
 
-	var events []storage.Event
+	var events model.Events
 	for rows.Next() {
-		var event storage.Event
+		var event model.Event
 		err = rows.Scan(
 			&event.ID,
 			&event.Title,
@@ -137,20 +137,20 @@ func (s *Storage) GetAll() []storage.Event {
 	return events
 }
 
-func (s *Storage) GetForTheDay(datetime time.Time) []storage.Event {
+func (s *PsqlRepository) GetForTheDay(datetime time.Time) model.Events {
 	rows, err := s.conn.Query(
 		context.Background(),
 		`SELECT * FROM t_events where date(start_date) = $1`,
 		datetime.Format(time.DateOnly),
 	)
 	if err != nil {
-		return []storage.Event{}
+		return model.Events{}
 	}
 
-	var events []storage.Event
+	var events model.Events
 	var id string
 	for rows.Next() {
-		var event storage.Event
+		var event model.Event
 		err = rows.Scan(
 			&id,
 			&event.CreatorID,
@@ -161,7 +161,7 @@ func (s *Storage) GetForTheDay(datetime time.Time) []storage.Event {
 			&event.NotifyAt,
 		)
 
-		event.ID = storage.CreateEventIDFrom(id)
+		event.ID = model.CreateEventIDFrom(id)
 
 		if err != nil {
 			continue
@@ -173,20 +173,20 @@ func (s *Storage) GetForTheDay(datetime time.Time) []storage.Event {
 	return events
 }
 
-func (s *Storage) GetForTheWeek(datetime time.Time) []storage.Event {
+func (s *PsqlRepository) GetForTheWeek(datetime time.Time) model.Events {
 	rows, err := s.conn.Query(
 		context.Background(),
 		`SELECT * FROM t_events WHERE date(start_date) >= $1 AND $1 < date(start_date) + 7`,
 		datetime.Format(time.DateOnly),
 	)
 	if err != nil {
-		return []storage.Event{}
+		return model.Events{}
 	}
 
-	var events []storage.Event
+	var events model.Events
 	var id string
 	for rows.Next() {
-		var event storage.Event
+		var event model.Event
 		err = rows.Scan(
 			&id,
 			&event.CreatorID,
@@ -197,7 +197,7 @@ func (s *Storage) GetForTheWeek(datetime time.Time) []storage.Event {
 			&event.NotifyAt,
 		)
 
-		event.ID = storage.CreateEventIDFrom(id)
+		event.ID = model.CreateEventIDFrom(id)
 		if err != nil {
 			continue
 		}
@@ -208,20 +208,20 @@ func (s *Storage) GetForTheWeek(datetime time.Time) []storage.Event {
 	return events
 }
 
-func (s *Storage) GetForTheMonth(datetime time.Time) []storage.Event {
+func (s *PsqlRepository) GetForTheMonth(datetime time.Time) model.Events {
 	rows, err := s.conn.Query(
 		context.Background(),
 		`SELECT * FROM t_events WHERE date(start_date) >= $1 AND $1 < date(start_date) + 30`,
 		datetime.Format(time.DateOnly),
 	)
 	if err != nil {
-		return []storage.Event{}
+		return model.Events{}
 	}
 
-	var events []storage.Event
+	var events model.Events
 	var id string
 	for rows.Next() {
-		var event storage.Event
+		var event model.Event
 		err = rows.Scan(
 			&id,
 			&event.CreatorID,
@@ -232,7 +232,7 @@ func (s *Storage) GetForTheMonth(datetime time.Time) []storage.Event {
 			&event.NotifyAt,
 		)
 
-		event.ID = storage.CreateEventIDFrom(id)
+		event.ID = model.CreateEventIDFrom(id)
 		if err != nil {
 			continue
 		}
@@ -243,7 +243,7 @@ func (s *Storage) GetForTheMonth(datetime time.Time) []storage.Event {
 	return events
 }
 
-func (s *Storage) IsTimeBusy(datetime time.Time) bool {
+func (s *PsqlRepository) IsTimeBusy(datetime time.Time) bool {
 	var exist bool
 	row := s.conn.QueryRow(
 		context.Background(),
