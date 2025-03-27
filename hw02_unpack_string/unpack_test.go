@@ -2,12 +2,18 @@ package hw02unpackstring
 
 import (
 	"errors"
+
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/stretchr/testify/suite"
 )
 
-func TestUnpack(t *testing.T) {
+type UnpackSuite struct {
+	suite.Suite
+}
+
+func (s *UnpackSuite) TestUnpack() {
 	tests := []struct {
 		input    string
 		expected string
@@ -32,21 +38,26 @@ func TestUnpack(t *testing.T) {
 
 	for _, tc := range tests {
 		tc := tc
-		t.Run(tc.input, func(t *testing.T) {
+
+		s.Run(tc.input, func() {
 			result, err := Unpack(tc.input)
-			require.NoError(t, err)
-			require.Equal(t, tc.expected, result)
+			require.NoError(s.T(), err)
+			require.Equal(s.T(), tc.expected, result)
 		})
 	}
 }
 
-func TestUnpackInvalidString(t *testing.T) {
+func (s *UnpackSuite) TestUnpackInvalidString() {
 	invalidStrings := []string{"3abc", "45", "aaa10b"}
 	for _, tc := range invalidStrings {
 		tc := tc
-		t.Run(tc, func(t *testing.T) {
+		s.Run(tc, func() {
 			_, err := Unpack(tc)
-			require.Truef(t, errors.Is(err, ErrInvalidString), "actual error %q", err)
+			require.Truef(s.T(), errors.Is(err, ErrInvalidString), "actual error %q", err)
 		})
 	}
+}
+
+func TestUnpackSuite(t *testing.T) {
+	suite.Run(t, new(UnpackSuite))
 }
