@@ -8,7 +8,7 @@ import (
 	"net/http"
 
 	"github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/config"
-	"github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/model"
+	eventDomain "github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/domain/event"
 )
 
 type Server struct {
@@ -21,9 +21,9 @@ type Application interface {
 	CreateEvent(title, description, creatorID, startDate, endDate, notify string) (string, error)
 	DeleteEvent(id string) error
 	UpdateEvent(id, title, description, startDate, endDate, notify string) error
-	GetEventsForTheDay(date string) model.Events
-	GetEventsForTheWeek(date string) model.Events
-	GetEventsForTheMonth(date string) model.Events
+	GetEventsForTheDay(date string) eventDomain.Events
+	GetEventsForTheWeek(date string) eventDomain.Events
+	GetEventsForTheMonth(date string) eventDomain.Events
 }
 
 func NewServer(httpServerCfg *config.HTTPServer, app Application, logger *slog.Logger) *Server {

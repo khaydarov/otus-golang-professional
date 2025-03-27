@@ -1,4 +1,4 @@
-package event_repository
+package event
 
 import (
 	"context"
@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5"
-	"github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/model"
 )
 
 var ErrCouldNotConnect = errors.New("could not connect to the database")
@@ -34,7 +33,7 @@ func (s *PsqlRepository) Close(ctx context.Context) error {
 	return s.conn.Close(ctx)
 }
 
-func (s *PsqlRepository) Insert(event model.Event) error {
+func (s *PsqlRepository) Insert(event Event) error {
 	_, err := s.conn.Exec(
 		context.Background(),
 		`INSERT INTO t_events (id, user_id, title, description, start_date, end_date, notify_at) 
@@ -54,7 +53,7 @@ func (s *PsqlRepository) Insert(event model.Event) error {
 	return nil
 }
 
-func (s *PsqlRepository) Update(event model.Event) error {
+func (s *PsqlRepository) Update(event Event) error {
 	_, err := s.conn.Exec(
 		context.Background(),
 		`UPDATE t_events SET title = $1, description = $2, start_date = $3, end_date = $4`,
@@ -70,7 +69,7 @@ func (s *PsqlRepository) Update(event model.Event) error {
 	return nil
 }
 
-func (s *PsqlRepository) Delete(id model.EventID) error {
+func (s *PsqlRepository) Delete(id EventID) error {
 	_, err := s.conn.Exec(
 		context.Background(),
 		`DELETE FROM t_events WHERE id = $1`,
@@ -83,8 +82,8 @@ func (s *PsqlRepository) Delete(id model.EventID) error {
 	return nil
 }
 
-func (s *PsqlRepository) GetByID(id model.EventID) (model.Event, error) {
-	var event model.Event
+func (s *PsqlRepository) GetByID(id EventID) (Event, error) {
+	var event Event
 	row := s.conn.QueryRow(
 		context.Background(),
 		`SELECT title, description, start_date, end_date, notify_at FROM t_events WHERE id = $1`,
@@ -100,24 +99,24 @@ func (s *PsqlRepository) GetByID(id model.EventID) (model.Event, error) {
 		&event.NotifyAt,
 	)
 	if err != nil {
-		return model.Event{}, err
+		return Event{}, err
 	}
 
 	return event, nil
 }
 
-func (s *PsqlRepository) GetAll() model.Events {
+func (s *PsqlRepository) GetAll() Events {
 	rows, err := s.conn.Query(
 		context.Background(),
 		`SELECT * FROM t_events`,
 	)
 	if err != nil {
-		return model.Events{}
+		return Events{}
 	}
 
-	var events model.Events
+	var events Events
 	for rows.Next() {
-		var event model.Event
+		var event Event
 		err = rows.Scan(
 			&event.ID,
 			&event.Title,
@@ -137,20 +136,20 @@ func (s *PsqlRepository) GetAll() model.Events {
 	return events
 }
 
-func (s *PsqlRepository) GetForTheDay(datetime time.Time) model.Events {
+func (s *PsqlRepository) GetForTheDay(datetime time.Time) Events {
 	rows, err := s.conn.Query(
 		context.Background(),
 		`SELECT * FROM t_events where date(start_date) = $1`,
 		datetime.Format(time.DateOnly),
 	)
 	if err != nil {
-		return model.Events{}
+		return Events{}
 	}
 
-	var events model.Events
+	var events Events
 	var id string
 	for rows.Next() {
-		var event model.Event
+		var event Event
 		err = rows.Scan(
 			&id,
 			&event.CreatorID,
@@ -161,7 +160,7 @@ func (s *PsqlRepository) GetForTheDay(datetime time.Time) model.Events {
 			&event.NotifyAt,
 		)
 
-		event.ID = model.CreateEventIDFrom(id)
+		event.ID = CreateEventIDFrom(id)
 
 		if err != nil {
 			continue
@@ -173,20 +172,20 @@ func (s *PsqlRepository) GetForTheDay(datetime time.Time) model.Events {
 	return events
 }
 
-func (s *PsqlRepository) GetForTheWeek(datetime time.Time) model.Events {
+func (s *PsqlRepository) GetForTheWeek(datetime time.Time) Events {
 	rows, err := s.conn.Query(
 		context.Background(),
 		`SELECT * FROM t_events WHERE date(start_date) >= $1 AND $1 < date(start_date) + 7`,
 		datetime.Format(time.DateOnly),
 	)
 	if err != nil {
-		return model.Events{}
+		return Events{}
 	}
 
-	var events model.Events
+	var events Events
 	var id string
 	for rows.Next() {
-		var event model.Event
+		var event Event
 		err = rows.Scan(
 			&id,
 			&event.CreatorID,
@@ -197,7 +196,7 @@ func (s *PsqlRepository) GetForTheWeek(datetime time.Time) model.Events {
 			&event.NotifyAt,
 		)
 
-		event.ID = model.CreateEventIDFrom(id)
+		event.ID = CreateEventIDFrom(id)
 		if err != nil {
 			continue
 		}
@@ -208,20 +207,20 @@ func (s *PsqlRepository) GetForTheWeek(datetime time.Time) model.Events {
 	return events
 }
 
-func (s *PsqlRepository) GetForTheMonth(datetime time.Time) model.Events {
+func (s *PsqlRepository) GetForTheMonth(datetime time.Time) Events {
 	rows, err := s.conn.Query(
 		context.Background(),
 		`SELECT * FROM t_events WHERE date(start_date) >= $1 AND $1 < date(start_date) + 30`,
 		datetime.Format(time.DateOnly),
 	)
 	if err != nil {
-		return model.Events{}
+		return Events{}
 	}
 
-	var events model.Events
+	var events Events
 	var id string
 	for rows.Next() {
-		var event model.Event
+		var event Event
 		err = rows.Scan(
 			&id,
 			&event.CreatorID,
@@ -232,7 +231,7 @@ func (s *PsqlRepository) GetForTheMonth(datetime time.Time) model.Events {
 			&event.NotifyAt,
 		)
 
-		event.ID = model.CreateEventIDFrom(id)
+		event.ID = CreateEventIDFrom(id)
 		if err != nil {
 			continue
 		}

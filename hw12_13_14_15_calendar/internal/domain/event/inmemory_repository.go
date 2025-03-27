@@ -1,25 +1,23 @@
-package event_repository
+package event
 
 import (
 	"sync"
 	"time"
-
-	"github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/model"
 )
 
 type InMemoryRepository struct {
 	mu sync.RWMutex
 
-	events map[model.EventID]model.Event
+	events map[EventID]Event
 }
 
 func NewInMemoryRepository() *InMemoryRepository {
 	return &InMemoryRepository{
-		events: make(map[model.EventID]model.Event),
+		events: make(map[EventID]Event),
 	}
 }
 
-func (s *InMemoryRepository) Insert(event model.Event) error {
+func (s *InMemoryRepository) Insert(event Event) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -31,7 +29,7 @@ func (s *InMemoryRepository) Insert(event model.Event) error {
 	return nil
 }
 
-func (s *InMemoryRepository) Update(event model.Event) error {
+func (s *InMemoryRepository) Update(event Event) error {
 	if _, ok := s.events[event.ID]; !ok {
 		return ErrEventDoesNotExist
 	}
@@ -43,7 +41,7 @@ func (s *InMemoryRepository) Update(event model.Event) error {
 	return nil
 }
 
-func (s *InMemoryRepository) Delete(id model.EventID) error {
+func (s *InMemoryRepository) Delete(id EventID) error {
 	if _, ok := s.events[id]; !ok {
 		return ErrEventDoesNotExist
 	}
@@ -55,28 +53,28 @@ func (s *InMemoryRepository) Delete(id model.EventID) error {
 	return nil
 }
 
-func (s *InMemoryRepository) GetByID(id model.EventID) (model.Event, error) {
+func (s *InMemoryRepository) GetByID(id EventID) (Event, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
 	event, ok := s.events[id]
 	if !ok {
-		return model.Event{}, ErrEventDoesNotExist
+		return Event{}, ErrEventDoesNotExist
 	}
 
 	return event, nil
 }
 
-func (s *InMemoryRepository) GetAll() []model.Event {
-	result := make([]model.Event, 0, len(s.events))
+func (s *InMemoryRepository) GetAll() Events {
+	result := make([]Event, 0, len(s.events))
 	for _, event := range s.events {
 		result = append(result, event)
 	}
 	return result
 }
 
-func (s *InMemoryRepository) GetForTheDay(datetime time.Time) model.Events {
-	var result model.Events
+func (s *InMemoryRepository) GetForTheDay(datetime time.Time) Events {
+	var result Events
 	for _, event := range s.events {
 		if event.StartDate.Day() == datetime.Day() {
 			result = append(result, event)
@@ -86,8 +84,8 @@ func (s *InMemoryRepository) GetForTheDay(datetime time.Time) model.Events {
 	return result
 }
 
-func (s *InMemoryRepository) GetForTheWeek(datetime time.Time) model.Events {
-	var result model.Events
+func (s *InMemoryRepository) GetForTheWeek(datetime time.Time) Events {
+	var result Events
 	for _, event := range s.events {
 		_, eventWeek := event.StartDate.ISOWeek()
 		_, targetDayWeek := datetime.ISOWeek()
@@ -100,8 +98,8 @@ func (s *InMemoryRepository) GetForTheWeek(datetime time.Time) model.Events {
 	return result
 }
 
-func (s *InMemoryRepository) GetForTheMonth(datetime time.Time) model.Events {
-	var result model.Events
+func (s *InMemoryRepository) GetForTheMonth(datetime time.Time) Events {
+	var result Events
 	for _, event := range s.events {
 		if event.StartDate.Month() == datetime.Month() {
 			result = append(result, event)

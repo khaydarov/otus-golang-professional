@@ -5,18 +5,18 @@ import (
 	"log/slog"
 	"time"
 
-	"github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/model"
+	eventDomain "github.com/khaydarov/otus-golang-professional/hw12_13_14_15_calendar/internal/domain/event"
 )
 
 type Storage interface {
-	Insert(event model.Event) error
+	Insert(event eventDomain.Event) error
 	IsTimeBusy(datetime time.Time) bool
-	Delete(id model.EventID) error
-	Update(event model.Event) error
-	GetByID(id model.EventID) (model.Event, error)
-	GetForTheDay(datetime time.Time) model.Events
-	GetForTheWeek(datetime time.Time) model.Events
-	GetForTheMonth(datetime time.Time) model.Events
+	Delete(id eventDomain.EventID) error
+	Update(event eventDomain.Event) error
+	GetByID(id eventDomain.EventID) (eventDomain.Event, error)
+	GetForTheDay(datetime time.Time) eventDomain.Events
+	GetForTheWeek(datetime time.Time) eventDomain.Events
+	GetForTheMonth(datetime time.Time) eventDomain.Events
 }
 
 type Calendar struct {
@@ -31,35 +31,35 @@ func NewCalendar(storage Storage, logger *slog.Logger) *Calendar {
 	}
 }
 
-func (a *Calendar) GetEventsForTheDay(date string) model.Events {
+func (a *Calendar) GetEventsForTheDay(date string) eventDomain.Events {
 	tm, err := parseStringToDateOnly(date)
 	if err != nil {
-		return model.Events{}
+		return eventDomain.Events{}
 	}
 
 	return a.storage.GetForTheDay(tm)
 }
 
-func (a *Calendar) GetEventsForTheWeek(date string) model.Events {
+func (a *Calendar) GetEventsForTheWeek(date string) eventDomain.Events {
 	tm, err := parseStringToDateOnly(date)
 	if err != nil {
-		return model.Events{}
+		return eventDomain.Events{}
 	}
 
 	return a.storage.GetForTheWeek(tm)
 }
 
-func (a *Calendar) GetEventsForTheMonth(date string) model.Events {
+func (a *Calendar) GetEventsForTheMonth(date string) eventDomain.Events {
 	tm, err := parseStringToDateOnly(date)
 	if err != nil {
-		return model.Events{}
+		return eventDomain.Events{}
 	}
 
 	return a.storage.GetForTheMonth(tm)
 }
 
 func (a *Calendar) UpdateEvent(id, title, description, startDate, endDate, notify string) error {
-	event, err := a.storage.GetByID(model.CreateEventIDFrom(id))
+	event, err := a.storage.GetByID(eventDomain.CreateEventIDFrom(id))
 	if err != nil {
 		return err
 	}
@@ -79,7 +79,7 @@ func (a *Calendar) UpdateEvent(id, title, description, startDate, endDate, notif
 }
 
 func (a *Calendar) DeleteEvent(id string) error {
-	return a.storage.Delete(model.CreateEventIDFrom(id))
+	return a.storage.Delete(eventDomain.CreateEventIDFrom(id))
 }
 
 func (a *Calendar) CreateEvent(title, description, creatorID, startDate, endDate, notify string) (string, error) {
@@ -103,8 +103,8 @@ func (a *Calendar) CreateEvent(title, description, creatorID, startDate, endDate
 	}
 
 	notifyAt := startTm.Add(-n)
-	newEvent := model.Event{
-		ID:          model.NewEventID(),
+	newEvent := eventDomain.Event{
+		ID:          eventDomain.NewEventID(),
 		CreatorID:   creatorID,
 		Title:       title,
 		StartDate:   startTm,
