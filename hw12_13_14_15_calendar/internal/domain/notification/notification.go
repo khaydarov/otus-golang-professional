@@ -1,4 +1,4 @@
-package storage
+package model
 
 import "time"
 
@@ -8,3 +8,5 @@ type Notification struct {
 	EventDate  time.Time
 	ReceiverID string
 }
+
+type Notifications []Notification
