@@ -1,4 +1,4 @@
-package api_middleware
+package middleware
 
 import (
 	"context"
