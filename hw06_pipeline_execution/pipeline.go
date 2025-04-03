@@ -40,5 +40,6 @@ func ExecutePipeline(in In, done In, stages ...Stage) Out {
 		}
 		result = stageWithDone(result, done, stage)
 	}
+
 	return result
 }
