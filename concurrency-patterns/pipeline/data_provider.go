@@ -12,16 +12,15 @@ func createIntStream(terminate <-chan struct{}, fn func() (int, error)) Out {
 	go func() {
 		defer close(out)
 		for {
+			v, err := fn()
+			if errors.Is(err, ErrNoMoreInts) {
+				return
+			}
+
 			select {
 			case <-terminate:
 				return
-			default:
-				v, err := fn()
-				if errors.Is(err, ErrNoMoreInts) {
-					return
-				}
-
-				out <- v
+			case out <- v:
 			}
 		}
 	}()
@@ -34,10 +33,10 @@ func RandomInt() (int, error) {
 }
 
 func DeterministicInts(ints []int) func() (int, error) {
-	cursor := 0
+	cursor := -1
 	return func() (int, error) {
-		defer func() { cursor++ }()
-		if cursor == len(ints) {
+		cursor++
+		if cursor >= len(ints) {
 			return 0, ErrNoMoreInts
 		}
 		return ints[cursor], nil
