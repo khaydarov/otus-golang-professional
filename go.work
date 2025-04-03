@@ -14,4 +14,6 @@ use (
     ./concurrency-patterns/future_promise
     ./concurrency-patterns/generator
     ./concurrency-patterns/pipeline
+    ./concurrency-patterns/fan_out
+    ./concurrency-patterns/fan_in
 )
