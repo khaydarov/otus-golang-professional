@@ -11,4 +11,6 @@ use (
     ./hw10_program_optimization
     ./hw11_telnet_client
     ./hw12_13_14_15_calendar
+    ./concurrency-patterns/future_promise
+    ./concurrency-patterns/generator
 )
