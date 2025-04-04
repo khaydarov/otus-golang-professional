@@ -16,4 +16,5 @@ use (
     ./concurrency-patterns/pipeline
     ./concurrency-patterns/fan_out
     ./concurrency-patterns/fan_in
+    ./concurrency-patterns/semaphore
 )
