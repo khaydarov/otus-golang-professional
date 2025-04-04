@@ -17,4 +17,5 @@ use (
     ./concurrency-patterns/fan_out
     ./concurrency-patterns/fan_in
     ./concurrency-patterns/semaphore
+    ./concurrency-patterns/worker_pool
 )
