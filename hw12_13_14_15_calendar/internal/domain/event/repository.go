@@ -1,4 +1,4 @@
-package storage
+package event
 
 import (
 	"errors"
@@ -14,9 +14,10 @@ type EventRepository interface {
 	Insert(event Event) error
 	Update(event Event) error
 	Delete(id EventID) error
-	GetAll() []Event
-	GetForTheDay(datetime time.Time) []Event
-	GetForTheWeek(datetime time.Time) []Event
-	GetForTheMonth(datetime time.Time) []Event
+	GetByID(id EventID) (Event, error)
+	GetAll() Events
+	GetForTheDay(datetime time.Time) Events
+	GetForTheWeek(datetime time.Time) Events
+	GetForTheMonth(datetime time.Time) Events
 	IsTimeBusy(datetime time.Time) bool
 }

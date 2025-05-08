@@ -3,7 +3,7 @@ package httplogger
 import (
 	"context"
 	"io"
-	stdLog "log"
+	"log"
 	"log/slog"
 )
 
@@ -15,14 +15,14 @@ type HTTPRequestLoggerHandler struct {
 	slog.Handler
 
 	opts  HTTPRequestLoggerHandlerOptions
-	l     *stdLog.Logger
+	l     *log.Logger
 	attrs []slog.Attr
 }
 
 func NewHTTPRequestLoggerHandler(out io.Writer, opts HTTPRequestLoggerHandlerOptions) *HTTPRequestLoggerHandler {
 	return &HTTPRequestLoggerHandler{
 		opts: opts,
-		l:    stdLog.New(out, "", 0),
+		l:    log.New(out, "", 0),
 	}
 }
 
